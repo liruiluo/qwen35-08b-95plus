@@ -1,0 +1,10 @@
+ckpt/
+logs/
+nlu-benchmark/
+BFCL_v4_simple_python.json
+BFCL_v4_simple_python_possible_answer.json
+__pycache__/
+*.pyc
+results/**/results.jsonl
+snips/data/
+bfcl/data/
