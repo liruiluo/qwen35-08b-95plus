@@ -1,39 +1,91 @@
-# Train Qwen3.5-0.8B to 95%+ on SNIPS & BFCL simple_python
+# Train Qwen3.5-0.8B to 95%+ on SNIPS & BFCL simple_python with RL (GRPO + SPHERE)
 
-**中文摘要**：本仓库把 Qwen3.5-0.8B 在两个基准上从零样本拉到 95%+：
-SNIPS NLU（intent 准确率 / slot span-exact micro-F1）与 BFCL v4
-simple_python（官方 AST checker 严格语义）。包含完整 SFT 训练管线
-（纯 PyTorch、无 accelerate/peft 依赖）、面向"约定家族"的合成数据
-生成器、与官方逐条对拍的评测器、以及逐步复现说明。
+本仓库用**纯强化学习**（GRPO + SPHERE 正则，无 SFT 初始化）把
+Qwen3.5-0.8B 在两个基准上从零样本训练到 95%+：SNIPS NLU（intent 准确率
+/ slot span-exact micro-F1）与 BFCL v4 simple_python（官方 AST checker
+严格语义）。三种 SPHERE 臂（`last_adaptive` / `all_hidden_adaptive` /
+`last_fixed`，来自
+[intent-alignment-text-toy](https://github.com/liruiluo/intent-alignment-text-toy)
+的冻结协议）在两个数据集上分别从 base 独立训练。
 
-This repo takes **Qwen3.5-0.8B** from zero-shot to **95%+** on two benchmarks:
+## Measured starting points (zero-shot, protocol B — see "Protocol" below)
 
-| Benchmark | Metric | 0.8B zero-shot | After this repo's SFT |
+| Benchmark | Metric | base zero-shot | supervised reference* |
 |---|---|---|---|
-| SNIPS NLU (validate 700) | intent accuracy | 82.71% | see [results](results/) |
-| SNIPS NLU (validate 700) | slot span-exact micro-F1 | 43.91% | see [results](results/) |
-| BFCL v4 simple_python (400) | official AST checker (strict) | 73.75% | see [results](results/) |
+| SNIPS NLU (validate 700) | intent accuracy | 82.71% | 98.86% |
+| SNIPS NLU (validate 700) | slot span-exact micro-F1 | 19.38% | 96.68% |
+| BFCL v4 simple_python (400) | official AST checker (strict) | 72.25% | — |
 
-The key insight from the failure analysis (documented in `results/`): the
-zero-shot misses are overwhelmingly **convention failures**, not capability
-failures — percent-vs-decimal rates, canonical tokens vs paraphrases, date
-formats, string-typed numerics, dict inner-key schemas, list element
-canonicalization, and optionality. These are exactly what a small amount of
-targeted SFT fixes.
+\* the supervised reference is **not** the deliverable (the deliverable is
+RL-only); it exists to show the targets are learnable by this model on this
+data. The RL arms start from base with no supervised initialization.
+
+## Protocol (train == eval, one renderer)
+
+All prompting — training rollouts and evaluations — goes through
+`common/bproto.py`: the chat template is rendered **locally** with the
+model's own tokenizer (thinking disabled, optional tool schemas), and the
+token ids are sent to the sglang engine's `/generate` endpoint. This is not
+a stylistic choice; it is a measured correctness requirement:
+
+| weights | chat-completions serving render | local render + /generate |
+|---|---|---|
+| base | 82.71 intent / 19.61 slot-F1 | 82.71 / 19.38 |
+| supervised ckpt | **0.00 / 0.00** (700/700 unparsable) | 98.86 / 96.68 |
+
+A model whose behavior was shaped under one rendering collapses under the
+other; evaluating a trained checkpoint through a differently-rendered
+prompt measures the renderer, not the model. Every number in this repo is
+protocol-B.
+
+## Method
+
+- **GRPO**: group-relative advantages ((r − mean)/(std + 1e-4)) over
+  `--group` samples per prompt, no critic, no KL, on-policy (ratio = 1),
+  token-mean PPO-style loss with a global token denominator.
+- **SPHERE** (arXiv:2605.04712, dense-MLP mapping per the toy repo's frozen
+  protocol `docs/SPHERE_ONE_STEP_PROTOCOL.md`): Phi = input of each
+  Transformer MLP `down_proj` (captured by forward_pre_hook), only
+  action-token rows; per-layer L = ||Phi^T Phi / T − alpha I||_F^2 with
+  adaptive alpha = Tr(A)/D (detached) or fixed alpha = 1; sample-space
+  Gram when D > T; two backwards and ONE optimizer step with explicit
+  gradient assembly g = g_ppo + lambda * g_sphere,
+  lambda = rho * ||g_ppo|| / (||g_sphere|| + 1e-8), rho = 1e-3.
+- **Microbatch structure** (required by memory, faithful to the protocol):
+  the logical minibatch is sharded into physical microbatches for the PPO
+  forward/backward; detached action-token Phi rows are collected per
+  chunk, the SPHERE penalty and its closed-form dL/dPhi are computed on
+  the assembled logical batch, and a per-microbatch linear surrogate
+  `(Phi · dL/dPhi)` replay carries the gradient back. Replay identity is
+  monitored every step (relative L2 and surrogate inner-product deviation
+  are recorded in the per-step evidence).
+- **Arms**: `last_adaptive` (last MLP layer, adaptive alpha),
+  `all_hidden_adaptive` (all 24 layers, per-layer penalties summed),
+  `last_fixed` (last layer, alpha = 1).
+
+## Rewards
+
+- SNIPS: `0.5 * intent_ok + 0.5 * slot micro-F1` (span-exact, both-empty
+  counts as agreement).
+- BFCL: 1.0 iff the parsed tool call passes the **official AST checker**
+  (vendored in `bfcl/ast_checker_official.py`, cross-validated 400/400
+  identical verdicts against upstream on real model outputs).
 
 ## Repository layout
 
 ```
-common/train_sft.py        # pure-torch SFT trainer (assistant-only loss,
-                           #   non-thinking chat format, tools-aware rendering)
-snips/prepare_data.py      # snipsco/nlu-benchmark -> SFT jsonl (13784 train)
-snips/eval_snips.py        # intent acc + span-exact slot micro-F1 (serving)
-bfcl/gen_train_data.py     # synthetic convention-family generator (16.5K items,
+methods/sphere_grpo.py     # the RL trainer (GRPO + SPHERE, sglang rollouts,
+                           #   weight push-back, per-step evidence)
+methods/push_ckpt.py      # hot-swap any checkpoint into a running engine
+common/bproto.py           # shared render+generate layer (train == eval)
+common/train_sft.py        # pure-torch SFT trainer (reference only)
+snips/prepare_data.py      # snipsco/nlu-benchmark -> jsonl (13784 train)
+snips/eval_snips.py        # protocol-B eval: intent acc + slot micro-F1
+bfcl/gen_train_data.py     # synthetic convention-family generator (16.5K,
                            #   dedup-guarded against the real eval set)
-bfcl/ast_checker_official.py  # vendored official BFCL checker (Python branch;
-                              #   cross-validated: 400/400 identical verdicts)
-bfcl/eval_bfcl.py          # native-tools protocol + official strict scoring
-engine/launch_engine.sh    # sglang server launcher for evaluation
+bfcl/ast_checker_official.py  # vendored official BFCL checker
+bfcl/eval_bfcl.py          # protocol-B eval + official strict scoring
+engine/launch_engine.sh    # sglang server launcher
 scripts/get_data.sh        # fetch SNIPS repo + BFCL v4 eval data
 results/                   # baseline analysis, run logs, final numbers
 ```
@@ -42,100 +94,97 @@ results/                   # baseline analysis, run logs, final numbers
 
 ### 0. Environment
 
-- 1x GPU with >= 24 GB (trained on a single B300; 0.8B full-parameter SFT in
-  fp32 master weights + bf16 autocast peaks well under 20 GB)
-- Python with `torch` and `transformers` (tested: torch 2.14.1,
-  transformers 5.19.0). No accelerate / peft / trl / deepspeed needed.
-- [sglang](https://github.com/sgl-project/sglang) for serving during eval.
+- 1x GPU (trained alongside other tenants on a shared B300 275 GB; the
+  trainer peaks well under 40 GB with the default microbatch of 16).
+- Python with `torch`, `transformers`, and [sglang](https://github.com/sgl-project/sglang)
+  (tested: torch 2.14.1, transformers 5.19.0, sglang 0.5.22).
 
-### 1. Get the data
-
-```bash
-bash scripts/get_data.sh          # clones SNIPS repo, fetches BFCL v4 files
-```
-
-### 2. SNIPS
+### 1. Data
 
 ```bash
-cd snips
-python prepare_data.py --repo ../nlu-benchmark --out-dir data
-# -> data/train.jsonl (13784), data/validate.jsonl (700), data/schema.json
-
-python ../common/train_sft.py \
-    --data data/train.jsonl \
-    --model /path/to/Qwen3.5-0.8B \
-    --out ../ckpt/snips-sft \
-    --epochs 3 --bsz 16 --accum 2 --lr 1e-5 --max-len 1024
-
-# serve the checkpoint, then evaluate
-bash ../engine/launch_engine.sh ../ckpt/snips-sft 30000
-python eval_snips.py --base-url http://127.0.0.1:30000/v1 \
-    --model ../ckpt/snips-sft --data data/validate.jsonl --out results.jsonl
-```
-
-### 3. BFCL simple_python
-
-```bash
-cd bfcl
-python gen_train_data.py --out-dir data \
+bash scripts/get_data.sh
+cd snips && python prepare_data.py --repo ../nlu-benchmark --out-dir data
+cd ../bfcl && python gen_train_data.py --out-dir data \
     --bfcl-questions ../BFCL_v4_simple_python.json
-# -> data/train.jsonl (15840), data/val.jsonl (660), manifest.json
-# The generator never copies a real eval item (question-level dedup guard);
-# it teaches the convention families through schema descriptions.
-
-python ../common/train_sft.py \
-    --data data/train.jsonl \
-    --model /path/to/Qwen3.5-0.8B \
-    --out ../ckpt/bfcl-sft \
-    --epochs 2 --bsz 16 --accum 2 --lr 1e-5 --max-len 1024
-
-bash ../engine/launch_engine.sh ../ckpt/bfcl-sft 30000
-python eval_bfcl.py --base-url http://127.0.0.1:30000/v1 \
-    --model ../ckpt/bfcl-sft \
-    --questions ../BFCL_v4_simple_python.json \
-    --answers ../BFCL_v4_simple_python_possible_answer.json \
-    --out results.jsonl
 ```
 
-### Evaluation semantics (what "the score" means)
+### 2. Launch the rollout engine (base weights)
+
+```bash
+bash engine/launch_engine.sh /path/to/Qwen3.5-0.8B 30001
+```
+
+### 3. Train an RL arm
+
+```bash
+python methods/sphere_grpo.py \
+    --data snips/data/train.jsonl \
+    --base /path/to/Qwen3.5-0.8B \
+    --rollout-url http://127.0.0.1:30001 \
+    --arm last_adaptive --reward snips \
+    --out ckpt/snips-last-adaptive \
+    --steps 1500 --group 8 --prompts-per-step 8 \
+    --lr 3e-6 --max-new-tokens 160 --seed 17 --save-every 200
+```
+
+Each arm starts from the SAME base weights. Before starting the next arm,
+restore the engine to base:
+`python methods/push_ckpt.py http://127.0.0.1:30001 /path/to/Qwen3.5-0.8B`.
+
+### 4. Evaluate (protocol B, same renderer as training)
+
+```bash
+# SNIPS: eval whatever weights the engine currently holds
+python snips/eval_snips.py --engine-url http://127.0.0.1:30001 \
+    --model /path/to/Qwen3.5-0.8B --data snips/data/validate.jsonl \
+    --out results/snips-<arm>.jsonl
+
+# BFCL: push the trained checkpoint into the engine first, then
+python methods/push_ckpt.py http://127.0.0.1:30001 ckpt/<arm>
+python bfcl/eval_bfcl.py --engine-url http://127.0.0.1:30001 \
+    --model /path/to/Qwen3.5-0.8B \
+    --questions BFCL_v4_simple_python.json \
+    --answers BFCL_v4_simple_python_possible_answer.json \
+    --out results/bfcl-<arm>.jsonl
+```
+
+### Evaluation semantics
 
 - **SNIPS**: span-exact micro-F1 over `(slot_name, exact-substring-value)`
-  pairs, intent = exact class match. Temp 0, thinking disabled, identical
-  system prompt at train and eval time.
-- **BFCL**: the official AST checker, vendored from the gorilla repo and
-  cross-validated to produce identical verdicts on 400/400 real model
-  outputs. The eval uses the native tools API (schemas rendered into the
-  prompt by the server) and the official persona system prompt — the same
-  protocol used for the zero-shot baseline, so gains are apples-to-apples.
+  pairs; intent = exact class match; temp 0; same system prompt as training.
+- **BFCL**: official AST checker semantics; the model answers in Qwen
+  tool markup, parsed and scored strictly.
 
-## Why 95%+ is reachable (failure analysis)
+## Data hygiene
 
-Auditing the zero-shot failures on BFCL (57 wrong under strict semantics)
-showed they decompose into learnable convention families:
-
-- 12x rate-as-percent (question says "10%", gold expects `0.1`)
-- ~20x paraphrase-vs-canonical-token ("human cell" vs `"human"`)
-- 13x strict typing (unquoted `2022` for a string-typed param)
-- 3x dict inner-key guessing, 7x genuine value errors, 1x empty output
-
-`bfcl/gen_train_data.py` builds targeted coverage for each family **plus
-distractors that punish blanket rules** (e.g. a `rate_percent` param that
-wants `5`, not `0.05`), so the model learns to read the schema, not a
-reflex. The same principle drives the SNIPS side: train and eval share the
-system prompt and output format byte-for-byte.
+- SNIPS train/validate are the official split files; the validate split is
+  never seen by the trainer (verified: rollout prompts come from
+  `train.jsonl` only).
+- The BFCL synthetic generator has a question-level dedup guard against
+  the real v4 eval set (0 collisions at generation time) and teaches
+  conventions through schema descriptions, not eval questions.
+- A gold-answer leak in early RL rollout prompts (the assistant-gold turn
+  of the SFT-format rows was rendered INTO the prompt) was found and
+  fixed before any reported RL number; the postmortem is in
+  `results/leak-postmortem.md`.
 
 ## Notes & gotchas (learned the hard way)
 
-1. **Engine swaps**: a health-check `200` only proves *an* engine is alive,
-   not *which* engine. After swapping checkpoints, verify the loaded model
-   via the process command line. A sub-15s "healthy" boot after a swap is a
-   red flag — weights take a minute to load.
-2. **Markup typing**: in Qwen tool markup, parameter values carry types via
-   JSON quoting. Training targets use `json.dumps` per value, which is what
-   teaches string-typed numerics (`"2022"`) and decimal rates (`0.05`).
-3. **Parser**: accept both `json.loads` and `ast.literal_eval` for parameter
-   values, or Python-style `True/False/None` silently become wrong-typed
-   strings.
+1. **Train == eval rendering**: see the Protocol section. Never evaluate a
+   trained checkpoint through a server-side re-rendering of the prompt.
+2. **Engine swaps**: a health-check `200` only proves *an* engine is alive,
+   not *which* engine. Verify the loaded model via the process command
+   line, or push weights into a known engine and verify behavior.
+3. **Checkpoint configs**: `save_pretrained` writes the text-model
+   config (`qwen3_5_text`), which a fresh sglang launch may resolve to a
+   different flashinfer JIT variant than the multimodal-wrapper base on
+   offline machines. The supported path is: launch the engine from base,
+   then `push_ckpt.py` the checkpoint in.
+4. **Markup typing**: parameter values carry types via JSON quoting;
+   training targets use `json.dumps` per value.
+5. **Parser**: accept both `json.loads` and `ast.literal_eval` for
+   parameter values, or Python-style `True/False/None` silently become
+   wrong-typed strings.
 
 ## License
 
