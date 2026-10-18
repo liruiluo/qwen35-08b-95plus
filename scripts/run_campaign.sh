@@ -47,7 +47,7 @@ train_arm () {  # dataset arm steps lr pps maxnew
   PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
     $PY methods/sphere_grpo.py --data "$data" --base $BASE --rollout-url $URL \
       --arm "$arm" --reward "$reward" --out "ckpt/$tag" \
-      --steps "$steps" --group 8 --prompts-per-step "$pps" --lr "$lr" \
+      --steps "$steps" --group 16 --prompts-per-step "$pps" --lr "$lr" \
       --max-new-tokens "$mx" --seed 17 --save-every 200 \
       > "logs/rl-$tag.log" 2>&1
   local rc=$?
@@ -74,13 +74,13 @@ eval_arm () {  # dataset tag
 for arm in last_adaptive all_hidden_adaptive last_fixed; do
   ensure_engine
   restore_base
-  train_arm snips "$arm" "$SNIPS_STEPS" 3e-6 8 160
+  train_arm snips "$arm" "$SNIPS_STEPS" 3e-6 4 160
   eval_arm snips "snips-$arm"
 done
 for arm in last_adaptive all_hidden_adaptive last_fixed; do
   ensure_engine
   restore_base
-  train_arm bfcl "$arm" "$BFCL_STEPS" 3e-6 8 256
+  train_arm bfcl "$arm" "$BFCL_STEPS" 3e-6 4 256
   eval_arm bfcl "bfcl-$arm"
 done
 echo "[campaign] ALL_DONE $(date -u +%FT%TZ)"

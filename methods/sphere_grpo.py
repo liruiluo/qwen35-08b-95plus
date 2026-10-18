@@ -157,19 +157,38 @@ def parse_pred_snips(content):
 
 
 def reward_snips(response, gold):
-    """0.5 * intent_ok + 0.5 * slot F1 (span-exact, per sample)."""
+    """0.5 * intent_ok + 0.5 * shaped slot score.
+
+    Shaping (training reward only; evaluation uses the official exact
+    span F1): an emitted slot whose NAME matches a gold slot but whose
+    value is wrong counts as 0.25 TP + 0.75 FP. Without this, trying a
+    hard slot with a wrong value scores the same as omitting it (and
+    worse, via FP), so the policy is pushed to skip the annotation-
+    convention slots entirely (playlist_owner="my", music_item="track",
+    ...) — an exploration wall measured on this task: RL ran 1500 steps
+    to slot recall 47% with the exact-match-only reward.
+    """
     intent, slots = parse_pred_snips(response)
     gold_slots = [(s["name"], s["value"]) for s in gold["slots"]]
     i_ok = 1.0 if intent == gold["intent"] else 0.0
     rest = list(slots)
-    tp = 0
-    for g in gold_slots:
-        if g in rest:
-            tp += 1
-            rest.remove(g)
-    fp, fn = len(rest), len(gold_slots) - tp
-    p = tp / (tp + fp) if tp + fp else 0.0
-    r = tp / (tp + fn) if tp + fn else 0.0
+    tp = 0.0
+    name_credit = 0.0
+    for gname, gval in gold_slots:
+        for p in list(rest):
+            if p[0] == gname:
+                rest.remove(p)
+                if p[1] == gval:
+                    tp += 1.0
+                else:
+                    name_credit += 0.25   # right name, wrong value
+                break
+    # each name-mismatched emission: 0.25 toward TP, 0.75 toward FP
+    tpw = tp + name_credit
+    fpw = float(len(rest)) + 3.0 * name_credit
+    n_gold = len(gold_slots)
+    p = tpw / (tpw + fpw) if tpw + fpw else 0.0
+    r = tpw / n_gold if n_gold else 0.0
     f1 = 2 * p * r / (p + r) if p + r else 0.0
     if not gold_slots and not slots:
         f1 = 1.0          # both empty: perfect agreement
