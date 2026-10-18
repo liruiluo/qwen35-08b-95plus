@@ -158,11 +158,13 @@ python bfcl/eval_bfcl.py --engine-url http://127.0.0.1:30001 \
 ## Data hygiene
 
 - SNIPS train/validate are the official split files; the validate split is
-  never seen by the trainer (verified: rollout prompts come from
-  `train.jsonl` only).
+  never seen by the trainer (rollout prompts come from `train.jsonl`
+  only). The official split itself ships with 10 exact + 14 near-duplicate
+  utterances (2.0%) — documented in `results/leakage-audit.md`, identical
+  for every method compared here.
 - The BFCL synthetic generator has a question-level dedup guard against
-  the real v4 eval set (0 collisions at generation time) and teaches
-  conventions through schema descriptions, not eval questions.
+  the real v4 eval set: measured **0/400 exact overlaps** and 3/400 shared
+  8-grams (standard math phrasings), via `scripts/leakage_audit.py`.
 - A gold-answer leak in early RL rollout prompts (the assistant-gold turn
   of the SFT-format rows was rendered INTO the prompt) was found and
   fixed before any reported RL number; the postmortem is in
