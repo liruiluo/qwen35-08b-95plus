@@ -237,22 +237,29 @@ class SphereHook:
             h.remove()
 
 
-def sphere_loss_layer(phi, alpha_mode):
-    """L = ||Phi^T Phi / T - alpha I_D||_F^2 for one layer's [T, D] rows."""
-    T, D = phi.shape[-2], phi.shape[-1]
-    with torch.no_grad():
-        pf = phi.detach().float()
-        trA = (pf * pf).sum() / T
-        alpha = (trA / D).item() if alpha_mode == "adaptive" else float(alpha_mode)
-    phi32 = phi.float()
-    trA = (phi32 * phi32).sum() / T          # attached
+def sphere_grad_layer(phi_rows, alpha_mode):
+    """Closed-form SPHERE penalty + dL/dPhi for one layer's detached [T, D]
+    action-token rows.
+
+    L = ||Phi^T Phi / T - alpha I||_F^2 with the toy protocol's two spaces:
+    feature Gram A = Phi^T Phi / T when D <= T, sample Gram G = Phi Phi^T / T
+    when D > T (identical Frobenius norm and trace; the isotropic target
+    stays dimension D). alpha adaptive = Tr(A)/D detached, or fixed.
+    """
+    phi = phi_rows.detach().float()
+    T, D = phi.shape
+    trA = (phi * phi).sum() / T
+    alpha = (trA / D).item() if alpha_mode == "adaptive" else float(alpha_mode)
+    eye = torch.eye(phi.shape[-1] if D <= T else T, device=phi.device)
     if D <= T:
-        A = phi32.t() @ phi32 / T
-        trA2 = (A * A).sum()
+        A = phi.t() @ phi / T
+        L = (A * A).sum() - 2.0 * alpha * trA + (alpha * alpha) * D
+        dl = (4.0 / T) * (phi @ (A - alpha * eye))
     else:
-        G = phi32 @ phi32.t()
-        trA2 = (G * G).sum() / (T * T)
-    return trA2 - 2.0 * alpha * trA + (alpha * alpha) * D, alpha
+        G = phi @ phi.t() / T
+        L = (G * G).sum() - 2.0 * alpha * trA + (alpha * alpha) * D
+        dl = (4.0 / T) * ((G - alpha * eye) @ phi)
+    return L.item(), alpha, dl
 
 
 # ------------------------------------------------------------------ data
@@ -279,7 +286,9 @@ def load_rows(path, reward_kind):
                 continue
             d = json.loads(line)
             if reward_kind == "snips":
-                rows.append({"messages": d["messages"], "tools": None,
+                # train.jsonl rows are [system, user, assistant-gold]; the
+                # rollout prompt MUST exclude the assistant turn (gold leak)
+                rows.append({"messages": d["messages"][:-1], "tools": None,
                              "gold": json.loads(d["messages"][2]["content"]),
                              "gold_item": None})
             else:
@@ -312,6 +321,10 @@ def main():
                     help="restrict to a seeded subset of N prompts (0=all)")
     ap.add_argument("--seed", type=int, default=17)
     ap.add_argument("--sync-every", type=int, default=1)
+    ap.add_argument("--microbatch", type=int, default=16,
+                    help="physical microbatch size (memory sharding only; "
+                         "PPO loss keeps the global token denominator and "
+                         "SPHERE assembles the full logical batch)")
     ap.add_argument("--save-every", type=int, default=0,
                     help="save a numbered checkpoint every N steps "
                          "(0 = only the final save)")
@@ -408,21 +421,36 @@ def main():
         gen_ids, attn_full = gen_ids.cuda(), attn_full.cuda()
         resp_mask = (labels[:, 1:].cuda() != -100)
 
-        # ---- pass 1: PPO action loss backward
+        # ---- pass 1: PPO microbatched forward/backward. The logical
+        # minibatch is sharded only for memory; the token-mean loss keeps
+        # the global denominator so gradients sum to the full-batch PPO
+        # gradient. Detached action-token Phi rows are collected per chunk
+        # for the SPHERE pass (toy protocol structure).
+        CH = args.microbatch
         sphere.clear()
-        logits = model(input_ids=gen_ids, attention_mask=attn_full).logits
-        logp = torch.log_softmax(logits[:, :-1].float(), dim=-1)
-        tgt = gen_ids[:, 1:]
-        tok_logp = torch.gather(logp, 2, tgt.unsqueeze(-1)).squeeze(-1)
-        # reference-kernel pad rows can carry NaN; real causal rows are finite
-        tok_logp = torch.nan_to_num(tok_logp, nan=0.0, posinf=0.0, neginf=0.0)
-        denom = resp_mask.float().sum().clamp(min=1.0)
-        ppo_loss = -((tok_logp * resp_mask.float() * adv.unsqueeze(1)).sum()
-                     / denom)
-        del logits, logp
-
         opt.zero_grad(set_to_none=True)
-        ppo_loss.backward()
+        phi_collect = {li: [] for li in target_layers}
+        denom = resp_mask.float().sum().clamp(min=1.0)
+        for c0 in range(0, B, CH):
+            c1 = min(c0 + CH, B)
+            logits = model(input_ids=gen_ids[c0:c1],
+                           attention_mask=attn_full[c0:c1]).logits
+            for li in target_layers:
+                phi = sphere.stash[li]
+                phi_collect[li].append(
+                    phi[:, :-1, :][resp_mask[c0:c1]].detach())
+            sphere.clear()
+            lg = logits[:, :-1]
+            tok_logp = (lg.gather(2, gen_ids[c0:c1, 1:].unsqueeze(-1))
+                        .squeeze(-1).float()
+                        - torch.logsumexp(lg.float(), dim=-1))
+            # reference-kernel pad rows can carry NaN; real causal rows are finite
+            tok_logp = torch.nan_to_num(tok_logp, nan=0.0, posinf=0.0,
+                                        neginf=0.0)
+            m = resp_mask[c0:c1].float()
+            closs = -((tok_logp * m * adv[c0:c1].unsqueeze(1)).sum() / denom)
+            closs.backward()
+            del logits, lg, tok_logp
         g_ppo = {n: p.grad.detach().clone() for n, p in model.named_parameters()
                  if p.grad is not None}
         gn_ppo = math.sqrt(sum(float((g * g).sum()) for g in g_ppo.values()))
@@ -431,28 +459,58 @@ def main():
             sphere.clear()
             continue
 
-        # ---- pass 2: SPHERE loss backward (attached Phi)
-        sphere.clear()
-        _ = model(input_ids=gen_ids, attention_mask=attn_full)
+        # ---- pass 2: SPHERE — closed-form dL/dPhi on the assembled logical
+        # minibatch, then a per-microbatch linear surrogate replay so the
+        # penalty stays a property of the full batch while memory shards
+        opt.zero_grad(set_to_none=True)
         sph_terms, alphas = [], []
+        dl_rows, off = {}, {}
         for li in target_layers:
-            phi = sphere.stash[li]
-            phi_rows = phi[:, :-1, :][resp_mask]
-            if phi_rows.shape[0] == 0:
+            allrows = torch.cat(phi_collect[li], 0)
+            if allrows.shape[0] == 0:
                 continue
-            l, a = sphere_loss_layer(phi_rows, alpha_mode)
+            l, a, dl = sphere_grad_layer(allrows, alpha_mode)
             sph_terms.append(l)
             alphas.append(a)
-        opt.zero_grad(set_to_none=True)
+            dl_rows[li] = dl
+            off[li] = 0
+        g_sphere, gn_sphere = {}, 0.0
+        replay_rel_l2, surr_ip_dev = None, None
         if sph_terms:
-            sph_loss = sum(sph_terms)
-            sph_loss.backward()
+            l2n, refn = 0.0, 0.0
+            ip_closed, ip_replay = 0.0, 0.0
+            for ci, c0 in enumerate(range(0, B, CH)):
+                c1 = min(c0 + CH, B)
+                sphere.clear()
+                _ = model.model(input_ids=gen_ids[c0:c1],
+                                attention_mask=attn_full[c0:c1])
+                surr = None
+                for li in target_layers:
+                    if li not in dl_rows:
+                        continue
+                    phi = sphere.stash[li]
+                    phi_r = phi[:, :-1, :][resp_mask[c0:c1]]
+                    ref = phi_collect[li][ci]
+                    nr = phi_r.shape[0]
+                    dl_c = dl_rows[li][off[li]:off[li] + nr]
+                    off[li] += nr
+                    d = phi_r.detach().float() - ref
+                    l2n += float(d.pow(2).sum())
+                    refn += float(ref.pow(2).sum())
+                    ip_replay += float((phi_r.detach().float() * dl_c).sum())
+                    ip_closed += float((ref * dl_c).sum())
+                    t = (phi_r.float() * dl_c).sum()
+                    surr = t if surr is None else surr + t
+                if surr is not None:
+                    surr.backward()
             g_sphere = {n: p.grad.detach().clone()
                         for n, p in model.named_parameters() if p.grad is not None}
             gn_sphere = math.sqrt(sum(float((g * g).sum())
                                       for g in g_sphere.values()))
-        else:
-            sph_loss, g_sphere, gn_sphere = 0.0, {}, 0.0
+            replay_rel_l2 = (l2n ** 0.5) / (refn ** 0.5 + 1e-12)
+            surr_ip_dev = (abs(ip_replay - ip_closed)
+                           / (abs(ip_closed) + 1e-12))
+        sph_loss = sum(sph_terms) if sph_terms else 0.0
 
         # ---- explicit gradient combination + single optimizer step
         lam = RHO * gn_ppo / (gn_sphere + 1e-8) if gn_sphere > 0 else 0.0
@@ -496,9 +554,10 @@ def main():
         evidence["lambda_stats"].append(
             {"step": step, "g_ppo": gn_ppo, "g_sphere": gn_sphere,
              "lambda": lam,
-             "sphere_loss": float(sph_loss) if sph_terms else 0.0,
+             "sphere_loss": float(sph_loss),
              "alphas": alphas, "mean_reward": mr,
-             "action_tokens": int(resp_mask.sum().item())})
+             "action_tokens": int(resp_mask.sum().item()),
+             "replay_rel_l2": replay_rel_l2, "surr_ip_dev": surr_ip_dev})
         if step % 10 == 0 or step == args.steps - 1:
             print(f"step {step}/{args.steps} reward {mr:.3f} "
                   f"|g_ppo| {gn_ppo:.4f} |g_sphere| {gn_sphere:.3g} "
