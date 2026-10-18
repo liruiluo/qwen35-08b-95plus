@@ -1,35 +1,19 @@
 #!/usr/bin/env python3
 """Evaluate a chat model on SNIPS NLU (validate split): intent accuracy +
-span-exact slot micro-F1, via any OpenAI-compatible /v1/chat/completions.
+span-exact slot micro-F1.
 
-Protocol (identical to the baseline measurement):
-  temp 0, thinking disabled, same system prompt as training data.
+Protocol B (identical to the training rollout): the chat template is rendered
+locally with the model tokenizer (thinking disabled) and sent to the sglang
+engine's /generate endpoint as token ids. See common/bproto.py for why.
 
 Usage:
-  python eval_snips.py --base-url http://127.0.0.1:30000/v1 \
+  python eval_snips.py --engine-url http://127.0.0.1:30001 \
       --model /path/to/model --data data/validate.jsonl --out results.jsonl
 """
-import argparse, json, queue, threading, time, urllib.request
+import argparse, json, os, queue, sys, threading, time
 
-
-def call_api(base, model, system, text, tries=3):
-    body = json.dumps({
-        "model": model,
-        "messages": [{"role": "system", "content": system},
-                     {"role": "user", "content": text}],
-        "temperature": 0.0, "top_p": 1.0, "max_tokens": 2048,
-        "chat_template_kwargs": {"enable_thinking": False},
-    }).encode()
-    for i in range(tries):
-        try:
-            req = urllib.request.Request(base + "/chat/completions", data=body,
-                                         headers={"Content-Type": "application/json"})
-            r = json.load(urllib.request.urlopen(req, timeout=180))
-            return r["choices"][0]["message"]["content"] or ""
-        except Exception:
-            if i == tries - 1:
-                return None
-            time.sleep(2 * (i + 1))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from common.bproto import render_ids, generate  # noqa: E402
 
 
 def parse_pred(content):
@@ -55,22 +39,32 @@ def parse_pred(content):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--base-url", default="http://127.0.0.1:30000/v1")
-    ap.add_argument("--model", required=True)
+    ap.add_argument("--engine-url", default="http://127.0.0.1:30001",
+                    help="sglang engine root (its /generate is called)")
+    ap.add_argument("--model", required=True,
+                    help="local model path (tokenizer source; must match the "
+                         "weights the engine serves)")
     ap.add_argument("--data", default="data/validate.jsonl")
     ap.add_argument("--out", default="results.jsonl")
     ap.add_argument("--workers", type=int, default=32)
+    ap.add_argument("--limit", type=int, default=0)
     args = ap.parse_args()
 
+    from transformers import AutoTokenizer
+    tok = AutoTokenizer.from_pretrained(args.model)
+
     rows = [json.loads(l) for l in open(args.data) if l.strip()]
+    if args.limit:
+        rows = rows[:args.limit]
     test = []
     for r in rows:
         system = r["messages"][0]["content"]
         text = r["messages"][1]["content"]
         gold = json.loads(r["messages"][2]["content"])
-        test.append({"text": text, "intent": gold["intent"],
-                     "slots": [(s["name"], s["value"]) for s in gold["slots"]],
-                     "system": system})
+        test.append({"messages": [{"role": "system", "content": system},
+                                  {"role": "user", "content": text}],
+                     "intent": gold["intent"],
+                     "slots": [(s["name"], s["value"]) for s in gold["slots"]]})
 
     results = [None] * len(test)
     q = queue.Queue()
@@ -84,7 +78,15 @@ def main():
             except queue.Empty:
                 return
             item = test[i]
-            content = call_api(args.base_url, args.model, item["system"], item["text"])
+            try:
+                ids = render_ids(tok, item["messages"])
+                content = generate(args.engine_url, ids)
+            except Exception as e:  # noqa: BLE001
+                results[i] = {"id": i, "pred_intent": None, "intent_ok": 0,
+                              "tp": 0, "fp": 0, "fn": len(item["slots"]),
+                              "worker_error": str(e)[:200]}
+                q.task_done()
+                continue
             intent, slots = parse_pred(content)
             i_ok = 1 if intent == item["intent"] else 0
             gold = list(item["slots"])
@@ -93,7 +95,8 @@ def main():
                 if g in slots:
                     tp += 1
                     slots.remove(g)
-            results[i] = {"id": i, "text": item["text"], "gold_intent": item["intent"],
+            results[i] = {"id": i, "text": item["messages"][1]["content"],
+                          "gold_intent": item["intent"],
                           "pred_intent": intent, "intent_ok": i_ok,
                           "gold_slots": gold, "tp": tp, "fp": len(slots),
                           "fn": len(gold) - tp}

@@ -2,22 +2,25 @@
 """Evaluate a chat model on BFCL v4 simple_python (400 items) with the
 OFFICIAL AST-checker semantics (vendored in ast_checker_official.py).
 
-Protocol: native tools API (function schemas passed as `tools`, the server
-renders them into the prompt), BFCL persona system prompt, temp 0, thinking
-disabled. The model answers with Qwen tool markup; we parse it and score with
-the official checker. This is the strict number comparable to the official
-leaderboard (modulo serving stack).
+Protocol B (identical to the training rollout): the chat template is rendered
+locally with the model tokenizer (thinking disabled, tool schemas passed to
+apply_chat_template) and sent to the sglang engine's /generate endpoint as
+token ids. See common/bproto.py for why. The model answers with Qwen tool
+markup; we parse it and score with the official checker — the strict number
+comparable to the official leaderboard (modulo serving stack).
 
 Usage:
-  python eval_bfcl.py --base-url http://127.0.0.1:30000/v1 \
+  python eval_bfcl.py --engine-url http://127.0.0.1:30001 \
       --model /path/to/model \
       --questions BFCL_v4_simple_python.json \
       --answers BFCL_v4_simple_python.json.possible_answer \
       --out results.jsonl
 """
-import argparse, ast as ast_mod, json, queue, re, threading, time, urllib.request
+import argparse, ast as ast_mod, json, os, queue, re, sys, threading, time
 
-from ast_checker_official import ast_checker
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from common.bproto import render_ids, generate  # noqa: E402
+from ast_checker_official import ast_checker  # noqa: E402
 
 SYSTEM = ("You are an expert in composing functions. You are given a question and a set of possible functions. "
           "Based on the question, you will need to make one or more function/tool calls to achieve the purpose. "
@@ -36,26 +39,6 @@ def to_oai_tool(fd):
             "function": {"name": fd["name"].replace(".", "_"),
                          "description": fd.get("description", ""),
                          "parameters": schema}}
-
-
-def call_api(base, model, user, tool, tries=3):
-    body = json.dumps({
-        "model": model,
-        "messages": [{"role": "system", "content": SYSTEM},
-                     {"role": "user", "content": user}],
-        "tools": [tool], "tool_choice": "auto",
-        "temperature": 0.0, "top_p": 1.0, "max_tokens": 2048,
-        "chat_template_kwargs": {"enable_thinking": False}}).encode()
-    for i in range(tries):
-        try:
-            req = urllib.request.Request(base + "/chat/completions", data=body,
-                                         headers={"Content-Type": "application/json"})
-            r = json.load(urllib.request.urlopen(req, timeout=180))
-            return r["choices"][0]["message"]["content"] or ""
-        except Exception:
-            if i == tries - 1:
-                return None
-            time.sleep(2 * (i + 1))
 
 
 def parse_markup(text):
@@ -81,8 +64,11 @@ def parse_markup(text):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--base-url", default="http://127.0.0.1:30000/v1")
-    ap.add_argument("--model", required=True)
+    ap.add_argument("--engine-url", default="http://127.0.0.1:30001",
+                    help="sglang engine root (its /generate is called)")
+    ap.add_argument("--model", required=True,
+                    help="local model path (tokenizer source; must match the "
+                         "weights the engine serves)")
     ap.add_argument("--questions", required=True,
                     help="official BFCL_v4_simple_python.json (jsonl)")
     ap.add_argument("--answers", required=True,
@@ -90,6 +76,9 @@ def main():
     ap.add_argument("--out", default="results.jsonl")
     ap.add_argument("--workers", type=int, default=32)
     args = ap.parse_args()
+
+    from transformers import AutoTokenizer
+    tok = AutoTokenizer.from_pretrained(args.model)
 
     QS = [json.loads(l) for l in open(args.questions) if l.strip()]
     ANS = {}
@@ -110,17 +99,25 @@ def main():
             except queue.Empty:
                 return
             item = QS[i]
-            user = item["question"][0][0]["content"]
-            tool = to_oai_tool(item["function"][0])
-            out = call_api(args.base_url, args.model, user, tool)
-            calls = parse_markup(out)
-            v = ast_checker(item["function"], calls, ANS[item["id"]])
-            results[i] = {"id": item["id"],
-                          "ok": 1 if v["valid"] else 0,
-                          "error_type": v.get("error_type"),
-                          "error": (v.get("error") or [""])[:1],
-                          "n_calls": len(calls),
-                          "raw": (out or "")[:600]}
+            try:
+                user = item["question"][0][0]["content"]
+                tool = to_oai_tool(item["function"][0])
+                ids = render_ids(tok, [{"role": "system", "content": SYSTEM},
+                                       {"role": "user", "content": user}],
+                                 tools=[tool])
+                out = generate(args.engine_url, ids)
+                calls = parse_markup(out)
+                v = ast_checker(item["function"], calls, ANS[item["id"]])
+                results[i] = {"id": item["id"],
+                              "ok": 1 if v["valid"] else 0,
+                              "error_type": v.get("error_type"),
+                              "error": (v.get("error") or [""])[:1],
+                              "n_calls": len(calls),
+                              "raw": (out or "")[:600]}
+            except Exception as e:  # noqa: BLE001
+                results[i] = {"id": item["id"], "ok": 0,
+                              "error_type": "worker_error",
+                              "error": str(e)[:200], "n_calls": 0, "raw": ""}
             q.task_done()
 
     ths = [threading.Thread(target=worker) for _ in range(args.workers)]
