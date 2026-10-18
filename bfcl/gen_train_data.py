@@ -606,12 +606,14 @@ def main():
     val, train = items[:n_val], items[n_val:]
 
     os.makedirs(args.out_dir, exist_ok=True)
+    # train/val are written in the RAW format consumed by the RL trainer
+    # (methods/sphere_grpo.py load_rows: question/function/ground_truth).
     with open(os.path.join(args.out_dir, "train.jsonl"), "w") as f:
         for it in train:
-            f.write(json.dumps(to_sft(it, SYSTEM), ensure_ascii=False) + "\n")
+            f.write(json.dumps(it, ensure_ascii=False) + "\n")
     with open(os.path.join(args.out_dir, "val.jsonl"), "w") as f:
         for it in val:
-            f.write(json.dumps(to_sft(it, SYSTEM), ensure_ascii=False) + "\n")
+            f.write(json.dumps(it, ensure_ascii=False) + "\n")
     with open(os.path.join(args.out_dir, "items_bfcl_format.jsonl"), "w") as f:
         for it in items:
             f.write(json.dumps(it, ensure_ascii=False) + "\n")
