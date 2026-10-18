@@ -65,8 +65,16 @@ protocol-B.
 
 ## Rewards
 
-- SNIPS: `0.5 * intent_ok + 0.5 * slot micro-F1` (span-exact, both-empty
-  counts as agreement).
+- SNIPS: `0.5 * intent_ok + 0.5 * shaped slot score`. The training reward is
+  shaped: a slot with the right NAME and wrong VALUE counts 0.25 toward TP
+  and 0.75 toward FP. Without this shaping, trying a hard slot with a
+  wrong value scores the same as omitting it (and worse via FP), so the
+  policy is pushed to skip the annotation-convention slots entirely
+  (playlist_owner="my", music_item="track", ...) — an exploration wall
+  measured here: 1500 RL steps reached slot recall 47% with the
+  exact-match-only reward; the shaped reward reached 71.5% recall in 2000
+  steps with the curve still climbing. **Evaluation is unchanged**: the
+  official exact span micro-F1.
 - BFCL: 1.0 iff the parsed tool call passes the **official AST checker**
   (vendored in `bfcl/ast_checker_official.py`, cross-validated 400/400
   identical verdicts against upstream on real model outputs).

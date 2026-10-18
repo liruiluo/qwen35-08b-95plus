@@ -89,6 +89,7 @@ def main():
                 continue
             intent, slots = parse_pred(content)
             i_ok = 1 if intent == item["intent"] else 0
+            pred_all = list(slots)
             gold = list(item["slots"])
             tp = 0
             for g in gold:
@@ -98,7 +99,8 @@ def main():
             results[i] = {"id": i, "text": item["messages"][1]["content"],
                           "gold_intent": item["intent"],
                           "pred_intent": intent, "intent_ok": i_ok,
-                          "gold_slots": gold, "tp": tp, "fp": len(slots),
+                          "gold_slots": gold, "pred_slots": pred_all,
+                          "tp": tp, "fp": len(slots),
                           "fn": len(gold) - tp}
             q.task_done()
 
