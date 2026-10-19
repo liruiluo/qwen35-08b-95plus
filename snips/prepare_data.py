@@ -56,7 +56,7 @@ def build_split(repo, split, system):
                      if f.startswith("train_") and f.endswith("_full.json")]
         else:
             fname = [f for f in os.listdir(d)
-                     if f.startswith("validate_") and f.endswith(".json")]
+                     if f.startswith(f"{split}_") and f.endswith(".json")]
         if not fname:
             continue
         data = load_json(os.path.join(d, fname[0]))[intent]
@@ -98,6 +98,7 @@ def main():
         r["messages"][0]["content"] = system
 
     val_rows, _, _ = build_split(args.repo, "validate", system)
+    test_rows, _, _ = build_split(args.repo, "test", system)
 
     os.makedirs(args.out_dir, exist_ok=True)
     with open(os.path.join(args.out_dir, "train.jsonl"), "w") as f:
@@ -106,9 +107,15 @@ def main():
     with open(os.path.join(args.out_dir, "validate.jsonl"), "w") as f:
         for r in val_rows:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    if test_rows:
+        # The public snipsco/nlu-benchmark repo does NOT ship a test split;
+        # write one only if a fork/clone provides test_<Intent>.json files.
+        with open(os.path.join(args.out_dir, "test.jsonl"), "w") as f:
+            for r in test_rows:
+                f.write(json.dumps(r, ensure_ascii=False) + "\n")
     json.dump({"intents": intents, "slot_names": slot_names},
               open(os.path.join(args.out_dir, "schema.json"), "w"), indent=1)
-    print(f"train={len(train_rows)} validate={len(val_rows)} "
+    print(f"train={len(train_rows)} validate={len(val_rows)} test={len(test_rows)} "
           f"intents={len(intents)} slots={len(slot_names)}")
 
 
