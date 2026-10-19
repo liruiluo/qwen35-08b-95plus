@@ -156,24 +156,28 @@ def parse_pred_snips(content):
         return None, []
 
 
-def reward_snips(response, gold):
+def reward_snips(response, gold, name_credit=0.25):
     """0.5 * intent_ok + 0.5 * shaped slot score.
 
     Shaping (training reward only; evaluation uses the official exact
     span F1): an emitted slot whose NAME matches a gold slot but whose
-    value is wrong counts as 0.25 TP + 0.75 FP. Without this, trying a
-    hard slot with a wrong value scores the same as omitting it (and
-    worse, via FP), so the policy is pushed to skip the annotation-
-    convention slots entirely (playlist_owner="my", music_item="track",
-    ...) — an exploration wall measured on this task: RL ran 1500 steps
-    to slot recall 47% with the exact-match-only reward.
+    value is wrong counts name_credit toward TP and (1 - name_credit)
+    toward FP. Without any credit (0.0), trying a hard slot with a wrong
+    value scores worse than omitting it, so the policy is pushed to skip
+    the annotation-convention slots entirely (playlist_owner="my",
+    music_item="track", ...) — an exploration wall measured on this
+    task: RL ran 1500 steps to slot recall 47% with the exact-match-only
+    reward. Late in training, groups saturate (near-deterministic policy
+    ties all 16 rewards -> zero advantage); a higher name_credit in a
+    continuation pass keeps name-correct emissions profitable while the
+    exact-vs-wrong value gap still drives value learning.
     """
     intent, slots = parse_pred_snips(response)
     gold_slots = [(s["name"], s["value"]) for s in gold["slots"]]
     i_ok = 1.0 if intent == gold["intent"] else 0.0
     rest = list(slots)
     tp = 0.0
-    name_credit = 0.0
+    nvw = 0
     for gname, gval in gold_slots:
         for p in list(rest):
             if p[0] == gname:
@@ -181,11 +185,10 @@ def reward_snips(response, gold):
                 if p[1] == gval:
                     tp += 1.0
                 else:
-                    name_credit += 0.25   # right name, wrong value
+                    nvw += 1   # right name, wrong value
                 break
-    # each name-mismatched emission: 0.25 toward TP, 0.75 toward FP
-    tpw = tp + name_credit
-    fpw = float(len(rest)) + 3.0 * name_credit
+    tpw = tp + name_credit * nvw
+    fpw = float(len(rest)) + (1.0 - name_credit) * nvw
     n_gold = len(gold_slots)
     p = tpw / (tpw + fpw) if tpw + fpw else 0.0
     r = tpw / n_gold if n_gold else 0.0
@@ -335,6 +338,11 @@ def main():
     ap.add_argument("--prompts-per-step", type=int, default=16)
     ap.add_argument("--lr", type=float, default=1e-6)
     ap.add_argument("--gen-temp", type=float, default=1.0)
+    ap.add_argument("--name-credit", type=float, default=0.25,
+                    help="SNIPS shaping: TP credit for right-name-wrong-value "
+                         "slots (FP weight is 1 - credit). 0.25 for the base "
+                         "runs; continuation passes may raise it to keep "
+                         "emission profitable once groups saturate.")
     ap.add_argument("--max-new-tokens", type=int, default=160)
     ap.add_argument("--train-pool", type=int, default=0,
                     help="restrict to a seeded subset of N prompts (0=all)")
@@ -415,7 +423,8 @@ def main():
                 text = outs[pi][g]
                 r = batch_rows[pi]
                 if args.reward == "snips":
-                    rewards.append(reward_snips(text, r["gold"]))
+                    rewards.append(reward_snips(text, r["gold"],
+                                                args.name_credit))
                 else:
                     rewards.append(reward_bfcl(text, r["gold_item"]))
                 resp_ids = tok(text, add_special_tokens=False)["input_ids"]
