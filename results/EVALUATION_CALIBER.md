@@ -86,6 +86,7 @@ results/
     <arm>/trainer.log              训练器全程 stdout 日志
     <arm>/eval-test.jsonl          test 700 条逐例输出（含预测 JSON）
     <arm>/eval-test-score.txt      test 分数（逐字）
+    <arm>/eval-dev.jsonl           dev 700 条逐例输出（诊断）
     <arm>/eval-dev-score.txt       dev 分数（辅助诊断，从未用于选择）
     <arm>/curves.csv               每 step 奖励 + 50 步滚动均值
     <arm>/blocks.csv               100 步块均值
