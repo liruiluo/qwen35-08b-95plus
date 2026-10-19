@@ -1,23 +1,28 @@
 #!/usr/bin/env python3
-"""Generate synthetic BFCL-simple_python-style SFT training data.
+"""Generate synthetic BFCL-simple_python-style RL training data.
 
 The baseline audit showed the model's failures cluster into convention families
-(percent-vs-decimal rates, canonical tokens, date formats, string-typed
-numerics, dict inner keys, canonical list elements). This generator builds
-training items that teach those conventions through realistic schemas whose
-descriptions state the expected format, mirroring how the official BFCL golds
-behave. It does NOT copy any real BFCL v4 item (a dedup guard drops any
-collision).
+(percent-vs-decimal rates, canonical enum tokens, SI unit conversion, 24-hour
+times, ticker symbols, value trimming, math syntax, date formats, string-typed
+numerics, dict inner keys, canonical list elements, small fixed facts). This
+generator builds training items that teach those conventions. Schema
+descriptions deliberately mirror the official style -- often vague or even
+contradictory ("as a percentage" while the gold is the decimal fraction) --
+because that is what the official golds do; the convention itself is what the
+policy must learn from data consistency. It does NOT copy any real BFCL v4
+item (a dedup guard drops any collision when --bfcl-questions is passed).
 
 Each family mixes the target convention with look-alike distractors so the
 model must read the schema instead of applying one blanket rule.
 
 Output:
-  train.jsonl  (messages format, assistant = Qwen tool markup)
+  train.jsonl  (raw format: question / function / ground_truth)
   val.jsonl    (held-out 4%)
+  items_bfcl_format.jsonl (all items, original shuffled order)
   manifest.json (per-family counts)
 
-Usage: python gen_train_data.py --out-dir data [--seed 7]
+Usage: python gen_train_data.py --out-dir data [--seed 7] \
+    [--bfcl-questions official_questions.jsonl]
 """
 import argparse, json, os, random
 
@@ -192,21 +197,29 @@ def fam_rate(rng, i):
              f"periods, using a discount rate of {pct}% per period.")
         gold = {rate_key: [rate], "period": [period],
                 "cash_flows": [[pnum(-principal)] + [principal_d] * period]}
-        props = {rate_key: {"type": "float", "description": "Discount rate per period as a decimal fraction (e.g. 0.05 for 5%)"},
+        props = {rate_key: {"type": "float", "description": "The discount rate to use."},
                  "period": {"type": "integer"},
                  "cash_flows": {"type": "array", "items": {"type": "float"},
-                                "description": "Cash flow per period, starting with the initial investment (negative)"}}
+                                "description": "Series of future cash flows."}}
         req = [rate_key, "period", "cash_flows"]
     else:
         if rng.random() < 0.5:
+            rate_phrase = rng.choice([
+                f"at an annual rate of {pct}%",
+                f"with yearly interest of {pct} percent",
+                f"earning {pct}% per year"])
             q = (f"Calculate the {name.replace('_', ' ')} on a principal of "
-                 f"${principal} at an annual interest rate of {pct}% compounded "
+                 f"${principal}, {rate_phrase}, compounded "
                  f"{freq} for {years} years.")
             gold = {"principal": [principal], rate_key: [rate],
                     "compounding_freq": [freq], "time_years": [years]}
-            props = {"principal": {"type": "float"},
-                     rate_key: {"type": "float", "description": "Annual interest rate as a decimal fraction (e.g. 0.05 for 5%)"},
-                     "compounding_freq": {"type": "string", "description": "Compounding frequency as a word: monthly, quarterly, semi-annually, annually, or daily"},
+            props = {"principal": {"type": "integer",
+                                   "description": "The initial amount of money that was invested or loaned out."},
+                     rate_key: {"type": "float",
+                                "description": "The interest rate for a year as a percentage."},
+                     "compounding_freq": {"type": "string",
+                                          "enum": ["monthly", "quarterly", "semi-annually", "annually", "daily"],
+                                          "description": "The number of times that interest is compounded per unit period."},
                      "time_years": {"type": "integer"}}
             req = ["principal", rate_key, "compounding_freq", "time_years"]
         else:
@@ -217,23 +230,12 @@ def fam_rate(rng, i):
                     "compounding_periods_per_year": [n_per_year],
                     "time_years": [years]}
             props = {"present_value": {"type": "float"},
-                     rate_key: {"type": "float", "description": "Annual rate as a decimal fraction (e.g. 0.05 for 5%)"},
-                     "compounding_periods_per_year": {"type": "integer", "description": "Number of compounding periods per year (12 for monthly, 4 for quarterly, 1 for annually)"},
+                     rate_key: {"type": "float",
+                                "description": "The annual rate of return."},
+                     "compounding_periods_per_year": {"type": "integer", "description": "Number of compounding periods per year."},
                      "time_years": {"type": "integer"}}
             req = ["present_value", rate_key, "compounding_periods_per_year", "time_years"]
 
-    # distractor family: same shape but the schema says PERCENT -> keep 5 not 0.05
-    if rng.random() < 0.25:
-        pct_key = "rate_percent"
-        q = (f"What is the simple interest earned on a deposit of ${principal} "
-             f"at an annual rate of {pct} percent for {years} years? "
-             f"Use the simple_interest_calculator.")
-        gold = {"principal": [principal], pct_key: [pct], "time_years": [years]}
-        props = {"principal": {"type": "float"},
-                 pct_key: {"type": "float", "description": "Annual rate in percent (e.g. 5.0 means 5%, NOT 0.05)"},
-                 "time_years": {"type": "integer"}}
-        req = ["principal", pct_key, "time_years"]
-        name = "simple_interest_calculator"
     return item(q, name, {"_desc": f"Calculate {name.replace('_',' ')} for a financial quantity.", **props},
                 req, gold, f"f_rate_{i}")
 
@@ -246,8 +248,10 @@ def fam_canonical(rng, i):
         gene = rng.choice(["BRCA1", "TP53", "EGFR", "KRAS", "APOE", "MYC", "TNF"])
         q = f"Get the protein sequence for the gene {gene} in {common}s."
         gold = {"gene": [gene], "species": [latin]}
-        props = {"gene": {"type": "string"},
-                 "species": {"type": "string", "description": "Species in Latin binomial nomenclature, e.g. Homo sapiens for human"}}
+        props = {"gene": {"type": "string", "description": "The gene of interest."},
+                 "species": {"type": "string",
+                             "description": "The species for which the gene is to be analyzed.",
+                             "default": latin}}
         req = ["gene", "species"]; name = "get_protein_sequence"
     elif kind == "room":
         rt = rng.choice(ROOM_TYPES)
@@ -423,7 +427,8 @@ def fam_dict(rng, i):
                                 "description": f"exact keys drawn from: {', '.join(pools)}"}}
         req = ["table_name", "conditions"]; name = "db_fetch_records"
     else:
-        # list-of-dicts with column/operator/value
+        # list-of-dicts with column/operator/value (two key conventions,
+        # values sometimes stringified -- both appear in the official data)
         c1, c2 = rng.sample(cols, 2)
         op1 = rng.choice([">", "<", ">=", "<=", "="])
         val1 = rng.randint(18, 65)
@@ -431,12 +436,20 @@ def fam_dict(rng, i):
         eqcol = list(pools)[0]
         q = (f"Query the {table} table for records where {c1} {op1} {val1} "
              f"and {eqcol} equals {eqval}.")
-        gold = {"table": [table],
-                "conditions": [[{"column": [c1], "operator": [op1], "value": [val1]},
-                                {"column": [eqcol], "operator": ["="], "value": [eqval]}]]}
-        props = {"table": {"type": "string"},
-                 "conditions": {"type": "array", "items": {"type": "dict"},
-                                "description": "each element must have exactly the keys: column, operator, value"}}
+        if rng.random() < 0.5:
+            gold = {"table": [table],
+                    "conditions": [[{"column": [c1], "operator": [op1], "value": [val1]},
+                                    {"column": [eqcol], "operator": ["="], "value": [eqval]}]]}
+            props = {"table": {"type": "string"},
+                     "conditions": {"type": "array", "items": {"type": "dict"},
+                                    "description": "each element must have exactly the keys: column, operator, value"}}
+        else:
+            gold = {"table": [table],
+                    "conditions": [[{"field": [c1], "operation": [op1], "value": [str(val1)]},
+                                    {"field": [eqcol], "operation": ["="], "value": [eqval]}]]}
+            props = {"table": {"type": "string"},
+                     "conditions": {"type": "array", "items": {"type": "dict"},
+                                    "description": "each element must have exactly the keys: field, operation, value"}}
         req = ["table", "conditions"]; name = "database_query"
     return item(q, name, {"_desc": "Query a database.", **props}, req, gold, f"f_dict_{i}")
 
@@ -492,7 +505,7 @@ def fam_plain(rng, i):
     kind = rng.choice(["triangle", "factorial", "hypot", "convert", "lookup"])
     if kind == "triangle":
         b, h = rng.randint(2, 50), rng.randint(2, 50)
-        q = f"Find the area of a triangle with a base of {b} units and height of {h} units."
+        q = f"A triangle has a base measuring {b} units and a height of {h} units. What is its area?"
         gold = {"base": [b], "height": [h]}
         props = {"base": {"type": "integer"}, "height": {"type": "integer"}}; req = ["base", "height"]
         name = "calculate_triangle_area"
@@ -562,10 +575,329 @@ def fam_optional(rng, i):
     return item(q, name, {"_desc": f"Query {name.replace('_',' ')}.", **props}, req, gold, f"f_opt_{i}")
 
 
+def fam_enum(rng, i):
+    """Natural phrasing -> canonical enum token, official-style schemas."""
+    kind = rng.choice(["time_frame", "compounding", "compounding_cap",
+                       "sort", "detail_level", "root_type", "currency"])
+    if kind == "time_frame":
+        phrase, val = rng.choice([
+            ("the last six months", "six_months"), ("the past six months", "six_months"),
+            ("the past year", "year"), ("the last 12 months", "year"),
+            ("the last five years", "five_years"), ("the past 5 years", "five_years"),
+            ("the past decade", "ten_years")])
+        loc = rng.choice(["the Amazon rainforest", "the Sahara Desert", "Antarctica",
+                          "the Great Barrier Reef", "Yellowstone National Park"])
+        q = f"Pull up average precipitation data for {loc} covering {phrase}."
+        gold = {"location": [loc], "time_frame": [val]}
+        props = {"location": {"type": "string", "description": "The name of the location."},
+                 "time_frame": {"type": "string", "enum": ["six_months", "year", "five_years", "ten_years"],
+                                "description": "The time period for which data is required."}}
+        req = ["location", "time_frame"]; name = "ecology_data_precipitation_stats"
+    elif kind == "compounding":
+        phrase, val = rng.choice([
+            ("compounded monthly", "monthly"), ("compounded every month", "monthly"),
+            ("compounded quarterly", "quarterly"), ("compounded every three months", "quarterly"),
+            ("compounded twice a year", "semi-annually"), ("compounded semi-annually", "semi-annually"),
+            ("compounded once a year", "annually"), ("compounded annually", "annually"),
+            ("compounded every day", "daily"), ("compounded daily", "daily")])
+        principal = rng.choice([1000, 2500, 5000, 10000, 20000])
+        pct = rng.choice([3, 4, 5, 6, 7, 8])
+        years = rng.randint(1, 10)
+        q = (f"Compute the compound interest on a ${principal} deposit at {pct}% "
+             f"annual interest, {phrase}, over {years} years.")
+        gold = {"principal": [principal], "annual_rate": [pct / 100],
+                "compounding_freq": [val], "time_in_years": [years]}
+        props = {"principal": {"type": "integer"},
+                 "annual_rate": {"type": "float", "description": "The interest rate for a year as a percentage."},
+                 "compounding_freq": {"type": "string", "enum": ["monthly", "quarterly", "annually"],
+                                      "description": "The number of times that interest is compounded per unit period."},
+                 "time_in_years": {"type": "integer"}}
+        req = ["principal", "annual_rate", "compounding_freq", "time_in_years"]
+        name = "calculate_compound_interest"
+    elif kind == "compounding_cap":
+        phrase, val = rng.choice([
+            ("compounded every month", "monthly"),
+            ("compounded once a year", "Annually"),
+            ("compounded annually", "Annually"),
+            ("compounded twice a year", "Semi-annually"),
+            ("compounded quarterly", "Quarterly")])
+        principal = rng.choice([5000, 10000, 15000])
+        pct = rng.choice([4, 5, 6, 7])
+        q = (f"Compute the future value of ${principal} invested at an annual "
+             f"interest rate of {pct}%, {phrase}.")
+        gold = {"principal": [principal], "annual_interest_rate": [pct / 100],
+                "compounding_frequency": [val]}
+        props = {"principal": {"type": "integer"},
+                 "annual_interest_rate": {"type": "float", "description": "Interest rate per year."},
+                 "compounding_frequency": {"type": "string",
+                                           "enum": ["monthly", "Quarterly", "Semi-annually", "Annually"],
+                                           "description": "How often interest is compounded."}}
+        req = ["principal", "annual_interest_rate", "compounding_frequency"]
+        name = "investment_future_value"
+    elif kind == "sort":
+        phrase, val = rng.choice([
+            ("from highest to lowest", "descending"), ("highest first", "descending"),
+            ("in descending order", "descending"), ("biggest first", "descending"),
+            ("from lowest to highest", "ascending"), ("in ascending order", "ascending"),
+            ("alphabetical order", "ascending"), ("smallest first", "ascending")])
+        col = rng.choice(["price", "rating", "area", "population"])
+        q = f"List the countries by {col} {phrase}."
+        gold = {"sort_column": [col], "order": [val]}
+        props = {"sort_column": {"type": "string"},
+                 "order": {"type": "string", "enum": ["ascending", "descending"],
+                           "description": "Sort order."}}
+        req = ["sort_column", "order"]; name = "countries_ranked"
+    elif kind == "detail_level":
+        phrase, val = rng.choice([
+            ("with full details", "detailed"), ("in full detail", "detailed"),
+            ("with everything included", "detailed"), ("just the basics", "basic"),
+            ("a basic summary", "basic"), ("the short version", "basic")])
+        city, _ = rng.choice(CITIES)
+        q = f"Give me the traffic report for {city} {phrase}."
+        gold = {"location": [city], "detail_level": [val]}
+        props = {"location": {"type": "string"},
+                 "detail_level": {"type": "string", "enum": ["basic", "detailed"],
+                                  "description": "How much detail to include."}}
+        req = ["location", "detail_level"]; name = "traffic_report"
+    elif kind == "root_type":
+        phrase, val = rng.choice([
+            ("all the roots", "all"), ("both real and complex roots", "all"),
+            ("every root", "all"), ("the real roots", "real"), ("only the real roots", "real")])
+        a, b, c = rng.randint(1, 9), rng.randint(-15, 15), rng.randint(-15, 15)
+        q = (f"Solve the quadratic with coefficients a={a}, b={b}, c={c} "
+             f"and return {phrase}.")
+        gold = {"a": [a], "b": [b], "c": [c], "root_type": [val]}
+        props = {"a": {"type": "integer", "description": "The coefficient of the squared term in the quadratic equation."},
+                 "b": {"type": "integer", "description": "The coefficient of the linear term."},
+                 "c": {"type": "integer", "description": "The constant term."},
+                 "root_type": {"type": "string",
+                              "description": "The type of roots to return: 'real' for real roots, 'all' for both real and complex roots. Default value is 'real'."}}
+        req = ["a", "b", "c", "root_type"]; name = "solve_quadratic"
+    else:
+        cur = rng.choice(["USD", "EUR", "JPY", "GBP", "CAD", "AUD"])
+        amount = rng.choice([100, 250, 500, 1000, 2500])
+        q = f"What is the exchange rate from {cur} to USD for {amount} {cur}?"
+        gold = {"from_currency": [cur], "amount": [amount]}
+        props = {"from_currency": {"type": "string", "enum": ["USD", "EUR", "JPY", "GBP", "CAD", "AUD"]},
+                 "amount": {"type": "integer"}}
+        req = ["from_currency", "amount"]; name = "exchange_rate"
+    return item(q, name, {"_desc": f"Query {name.replace('_',' ')}.", **props}, req, gold, f"f_enum_{i}")
+
+
+UNIT_POOLS = [
+    ("inductance", "inductance", "henries (H)", [("mH", 1e-3), ("µH", 1e-6), ("H", 1.0)]),
+    ("capacitance", "capacitance", "farads (F)", [("µF", 1e-6), ("nF", 1e-9), ("pF", 1e-12)]),
+    ("resistance", "resistance", "ohms", [("kΩ", 1e3), ("MΩ", 1e6), ("Ω", 1.0)]),
+    ("length", "distance", "meters (m)", [("km", 1e3), ("cm", 1e-2), ("mm", 1e-3)]),
+    ("mass", "mass", "kilograms (kg)", [("g", 1e-3), ("mg", 1e-6), ("kg", 1.0)]),
+    ("volume", "volume", "liters (L)", [("mL", 1e-3), ("L", 1.0)]),
+    ("time", "duration", "seconds (s)", [("ms", 1e-3), ("µs", 1e-6), ("s", 1.0)]),
+]
+
+
+def fam_unit(rng, i):
+    """Question uses a prefixed unit; gold converts to the base SI unit."""
+    kind, param, unit_desc, prefixes = rng.choice(UNIT_POOLS)
+    base = rng.choice([1, 2, 5, 10, 20, 25, 47, 50, 100, 150, 220, 330, 470, 500, 1000])
+    prefix, mult = rng.choice(prefixes)
+    gold_val = pnum(base * mult)
+    if rng.random() < 0.5:
+        q = f"Calculate with a {param} of {base}{prefix}."
+        desc = f"The {param} in {unit_desc}."
+    else:
+        q = f"Calculate with a {param} of {base} {prefix}."
+        desc = f"The {param}."
+    gold = {param: [gold_val]}
+    props = {param: {"type": "float", "description": desc}}
+    req = [param]
+    name = "physics_calculate_" + param
+    return item(q, name, {"_desc": f"Calculate using the given {param}.", **props}, req, gold, f"f_unit_{i}")
+
+
+def fam_time24(rng, i):
+    """12-hour clock phrases -> integer hour in 24-hour format."""
+    phrase, hour = rng.choice([
+        ("11 PM", 23), ("at 11 in the evening", 23), ("10 PM", 22),
+        ("9 PM", 21), ("at 9 in the evening", 21), ("8 PM", 20),
+        ("7 PM", 19), ("at 7 in the evening", 19), ("6 PM", 18),
+        ("noon", 12), ("12 PM", 12), ("midnight", 0), ("12 AM", 0),
+        ("11 AM", 11), ("9 AM", 9), ("8 AM", 8), ("7 AM", 7),
+        ("6 AM", 6), ("at 6 in the morning", 6),
+        ("3 o'clock in the afternoon", 15), ("2 in the afternoon", 14)])
+    city, _ = rng.choice(CITIES)
+    q = f"Find restaurants in {city} that are open until {phrase}."
+    gold = {"location": [city], "operating_hours": [hour]}
+    props = {"location": {"type": "string", "description": "The city and state, e.g. New York, NY, you should format it as City, State."},
+             "operating_hours": {"type": "integer",
+                                 "description": "Preferred latest closing time. This is in 24 hour format. Default is 24."}}
+    req = ["location", "operating_hours"]; name = "restaurant_open_late"
+    return item(q, name, {"_desc": "Find restaurants by opening hours.", **props}, req, gold, f"f_time_{i}")
+
+
+TICKERS = {"Apple": "AAPL", "Microsoft": "MSFT", "Alphabet": "GOOGL",
+           "Amazon": "AMZN", "Tesla": "TSLA", "Meta": "META", "Nvidia": "NVDA",
+           "Netflix": "NFLX", "Intel": "INTC", "AMD": "AMD", "IBM": "IBM",
+           "Oracle": "ORCL", "Salesforce": "CRM", "Uber": "UBER", "Lyft": "LYFT",
+           "PayPal": "PYPL", "Starbucks": "SBUX", "Disney": "DIS", "Nike": "NKE",
+           "Boeing": "BA", "Cisco": "CSCO", "Adobe": "ADBE", "Pfizer": "PFE"}
+
+
+def fam_ticker(rng, i):
+    """Company name in the question -> ticker symbol (schema says 'ticker symbol')."""
+    comp, tick = rng.choice(list(TICKERS.items()))
+    days = rng.choice([1, 5, 10, 30, 90])
+    q = f"Show me the stock price history of {comp} covering the past {days} days."
+    gold = {"company": [tick], "days": [days]}
+    props = {"company": {"type": "string", "description": "The ticker symbol of the company."},
+             "days": {"type": "integer", "description": "Number of past days for which the stock price is required."}}
+    req = ["company", "days"]; name = "stock_price_lookup"
+    return item(q, name, {"_desc": "Look up stock prices.", **props}, req, gold, f"f_tick_{i}")
+
+
+TRIM_KINDS = [
+    # (kind, question value, canonical, param, name, enum_list, description)
+    ("cuisine", {"Thai food": "Thai", "Italian food": "Italian",
+                 "Mexican food": "Mexican", "Indian food": "Indian",
+                 "Japanese food": "Japanese", "Chinese food": "Chinese",
+                 "Thai cuisine": "Thai", "Italian cuisine": "Italian",
+                 "American food": "American", "Korean food": "Korean"}),
+    ("cell", {"human cell": "human", "bacterial cell": "bacterial",
+              "plant cell": "plant", "animal cell": "animal",
+              "blood cell": "blood", "stem cell": "stem",
+              "muscle cell": "muscle", "nerve cell": "nerve"}),
+    ("crime", {"theft crimes": "theft", "fraud crimes": "fraud",
+               "property crimes": "property", "violent crimes": "violent",
+               "white collar crimes": "white collar", "cyber crimes": "cyber"}),
+]
+
+
+def fam_trim(rng, i):
+    """Verbose category phrase -> canonical trimmed value."""
+    kind = rng.choice(["cuisine", "cell", "crime", "county", "specialty", "detail_word"])
+    if kind in ("cuisine", "cell", "crime"):
+        pool = next(t for k, t in TRIM_KINDS if k == kind)
+        verbose, canon = rng.choice(list(pool.items()))
+        city, _ = rng.choice(CITIES)
+        n = rng.choice([3, 5, 10])
+        if kind == "cuisine":
+            q = f"Can you find {n} restaurants in {city} that serve {verbose}?"
+            gold = {"location": [city], "food_type": [canon], "number": [n]}
+            props = {"location": {"type": "string", "description": "The specific location or area."},
+                     "food_type": {"type": "string", "description": "The type of food preferred."},
+                     "number": {"type": "integer", "description": "Number of results to return."}}
+            req = ["location", "food_type", "number"]; name = "find_restaurants"
+        elif kind == "cell":
+            q = f"Get information about the {verbose} structure."
+            gold = {"cell_type": [canon]}
+            props = {"cell_type": {"type": "string", "description": "The type of cell."}}
+            req = ["cell_type"]; name = "biology_get_cell_info"
+        else:
+            q = f"Show me the statistics for {verbose} in the last year."
+            gold = {"crime_type": [canon], "time_frame": ["year"]}
+            props = {"crime_type": {"type": "string", "description": "The category of crime."},
+                     "time_frame": {"type": "string", "enum": ["six_months", "year", "five_years"]}}
+            req = ["crime_type", "time_frame"]; name = "crime_statistics"
+    elif kind == "county":
+        county = rng.choice(["Santa Clara", "San Diego", "Orange", "Alameda",
+                             "Cook", "King", "Travis", "Denver", "Bexar"])
+        n = rng.randint(100000000, 999999999)
+        q = f"Look up the property with parcel number {n} in {county} county."
+        gold = {"parcel_number": [str(n)], "county": [county]}
+        props = {"parcel_number": {"type": "string", "description": "The parcel number."},
+                 "county": {"type": "string", "description": "The county name."}}
+        req = ["parcel_number", "county"]; name = "property_lookup"
+    elif kind == "specialty":
+        verbose, canon = rng.choice([
+            ("divorce cases", "Divorce"), ("family law cases", "Family"),
+            ("criminal defense cases", "Criminal"), ("personal injury cases", "Personal Injury"),
+            ("estate planning cases", "Estate Planning"), ("immigration cases", "Immigration")])
+        city, _ = rng.choice(CITIES)
+        q = f"Find a lawyer in {city} that handles {verbose}."
+        gold = {"city": [city], "specialty": [[canon]]}
+        props = {"city": {"type": "string"},
+                 "specialty": {"type": "array", "items": {"type": "string"},
+                               "description": "Legal specialty; each element must be one of: Divorce, Family, Criminal, Personal Injury, Estate Planning, Immigration"}}
+        req = ["city", "specialty"]; name = "lawyer_find_nearby"
+    else:
+        word, canon = rng.choice([
+            ("detail", "detailed"), ("the detailed version", "detailed"),
+            ("a summary", "basic"), ("the basics", "basic")])
+        bg = rng.choice(["Ticket to Ride", "Catan", "Pandemic", "Wingspan", "Azul"])
+        q = f"Get me {word} information about the board game {bg}."
+        gold = {"name": [bg], "detail_level": [canon]}
+        props = {"name": {"type": "string"},
+                 "detail_level": {"type": "string", "enum": ["basic", "detailed"],
+                                   "description": "Level of detail for the information."}}
+        req = ["name", "detail_level"]; name = "boardgame_get_info"
+    return item(q, name, {"_desc": f"Query {name.replace('_',' ')}.", **props}, req, gold, f"f_trim_{i}")
+
+
+def fam_mathsyntax(rng, i):
+    """Math notation: ** exponents, float intervals, pi evaluation."""
+    kind = rng.choice(["exponent", "pi", "fraction"])
+    if kind == "exponent":
+        k = rng.randint(2, 5)
+        a, b = rng.randint(1, 5), rng.randint(6, 10)
+        q = f"Compute the area beneath y=x^{k} between x={a} and x={b}."
+        gold = {"function": [f"x**{k}", f"y=x**{k}", f"lambda x: x**{k}"],
+                "interval": [[float(a), float(b)]],
+                "method": ["", "trapezoidal"]}
+        props = {"function": {"type": "string", "description": "The mathematical function as a string."},
+                 "interval": {"type": "array", "items": {"type": "float"},
+                              "description": "An array that defines the interval to calculate the area under the curve from the start to the end point."},
+                 "method": {"type": "string",
+                            "description": "The numerical method to approximate the area under the curve. The default value is 'trapezoidal'."}}
+        req = ["function", "interval"]; name = "calculate_area_under_curve"
+    elif kind == "pi":
+        freq = rng.randint(1, 12)
+        q = f"Plot a sine wave over the range from 0 to 2 * pi with frequency {freq}."
+        gold = {"start_range": [0], "end_range": [6.2832], "frequency": [freq],
+                "amplitude": ["", 1], "phase_shift": ["", 0]}
+        props = {"start_range": {"type": "float", "description": "The starting x-value of the sine wave."},
+                 "end_range": {"type": "float", "description": "The ending x-value of the sine wave."},
+                 "frequency": {"type": "integer", "description": "The frequency of the sine wave."},
+                 "amplitude": {"type": "float", "description": "The amplitude of the sine wave. Default is 1."},
+                 "phase_shift": {"type": "float", "description": "The phase shift of the sine wave. Default is 0."}}
+        req = ["start_range", "end_range", "frequency"]; name = "plot_sine_wave"
+    else:
+        num, den = rng.choice([(1, 2), (3, 4), (2, 3), (1, 4), (5, 8), (3, 8), (7, 8)])
+        q = f"Compute the decimal value of {num}/{den} rounded to four decimal places."
+        val = round(num / den, 4)
+        gold = {"numerator": [num], "denominator": [den], "result": [val]}
+        props = {"numerator": {"type": "integer"}, "denominator": {"type": "integer"},
+                 "result": {"type": "float", "description": "The decimal value."}}
+        req = ["numerator", "denominator"]; name = "fraction_to_decimal"
+    return item(q, name, {"_desc": f"Compute {name.replace('_',' ')}.", **props}, req, gold, f"f_math_{i}")
+
+
+DECK_FACTS = [
+    ("a king", 4), ("a queen", 4), ("an ace", 4), ("a jack", 4),
+    ("a heart", 13), ("a spade", 13), ("a diamond", 13), ("a club", 13),
+    ("a red card", 26), ("a black card", 26), ("a face card", 12),
+]
+
+
+def fam_knowledge(rng, i):
+    """Small fixed facts (deck composition etc.) that the question relies on."""
+    phrase, n = rng.choice(DECK_FACTS)
+    draws = rng.randint(1, 5)
+    q = (f"Draw {draws} cards with replacement from a standard 52-card deck. "
+            f"What is the chance of drawing {phrase} on each draw?")
+    gold = {"total_outcomes": [52], "event_outcomes": [n], "round": ["", 2]}
+    props = {"total_outcomes": {"type": "integer", "description": "The total number of outcomes."},
+             "event_outcomes": {"type": "integer", "description": "The number of outcomes where the event occurs."},
+             "round": {"type": "integer", "description": "Round the answer to a specified number of decimal places. Defaults to 2."}}
+    req = ["total_outcomes", "event_outcomes"]; name = "probabilities_calculate_single"
+    return item(q, name, {"_desc": "Calculate a probability.", **props}, req, gold, f"f_know_{i}")
+
+
 FAMILIES = [
-    (fam_rate, 2600), (fam_canonical, 3200), (fam_date, 1400),
-    (fam_strnum, 1400), (fam_dict, 1600), (fam_list, 1400),
-    (fam_plain, 4000), (fam_optional, 900),
+    (fam_rate, 3000), (fam_canonical, 2000), (fam_date, 1400),
+    (fam_strnum, 1000), (fam_dict, 1800), (fam_list, 1400),
+    (fam_plain, 2000), (fam_optional, 1200),
+    (fam_enum, 2500), (fam_unit, 1800), (fam_time24, 1200),
+    (fam_ticker, 1200), (fam_trim, 2200), (fam_mathsyntax, 1200),
+    (fam_knowledge, 600),
 ]
 
 SYSTEM = ("You are an expert in composing functions. You are given a question and a set of possible functions. "

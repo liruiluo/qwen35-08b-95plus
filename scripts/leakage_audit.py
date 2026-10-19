@@ -78,8 +78,8 @@ def main():
             if not l.strip():
                 continue
             d = json.loads(l)
-            # rows are {messages: [system, user, assistant], tools}
-            trq.append(norm(d["messages"][1]["content"]))
+            # raw-format row: {id, question, function, ground_truth}
+            trq.append(norm(d["question"]))
         evq = []
         for l in open(args.bfcl_eval):
             if not l.strip():

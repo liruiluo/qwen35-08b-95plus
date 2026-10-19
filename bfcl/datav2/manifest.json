@@ -1,0 +1,19 @@
+{
+ "fam_rate": 3000,
+ "fam_canonical": 2000,
+ "fam_date": 1400,
+ "fam_strnum": 1000,
+ "fam_dict": 1800,
+ "fam_list": 1400,
+ "fam_plain": 2000,
+ "fam_optional": 1200,
+ "fam_enum": 2500,
+ "fam_unit": 1800,
+ "fam_time24": 1200,
+ "fam_ticker": 1200,
+ "fam_trim": 2200,
+ "fam_mathsyntax": 1200,
+ "fam_knowledge": 600,
+ "total": 24500,
+ "dropped_vs_real": 0
+}
