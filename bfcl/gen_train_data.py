@@ -891,13 +891,192 @@ def fam_knowledge(rng, i):
     return item(q, name, {"_desc": "Calculate a probability.", **props}, req, gold, f"f_know_{i}")
 
 
+CITY_STATE = {"New York": "NY", "New York City": "NY", "San Francisco": "CA",
+             "Chicago": "IL", "Boston": "MA", "Seattle": "WA", "Austin": "TX",
+             "Denver": "CO", "Miami": "FL", "Los Angeles": "CA",
+             "Philadelphia": "PA", "Atlanta": "GA", "Dallas": "TX",
+             "Houston": "TX", "Phoenix": "AZ", "Portland": "OR"}
+
+
+def fam_citystate(rng, i):
+    """City name in question -> 'City, ST' when the schema asks for that format."""
+    kind = rng.choice(["restaurants", "lawyer", "weather"])
+    city = rng.choice(list(CITY_STATE))
+    full = f"{city}, {CITY_STATE[city]}"
+    if kind == "restaurants":
+        q = f"Find vegan restaurants in {city}."
+        gold = {"location": [full]}
+        props = {"location": {"type": "string",
+                              "description": "The city and state, e.g. New York, NY, you should format it as City, State."}}
+        req = ["location"]; name = "vegan_restaurant_find"
+    elif kind == "lawyer":
+        spec = rng.choice(["divorce", "criminal", "family"])
+        q = f"Find a {spec} lawyer in {city}."
+        gold = {"city": [full], "specialty": [[spec.capitalize()]]}
+        props = {"city": {"type": "string", "description": "The city and state, e.g. Chicago, IL"},
+                 "specialty": {"type": "array", "items": {"type": "string"},
+                               "description": "Legal specialty; each element must be one of: Divorce, Family, Criminal"}}
+        req = ["city", "specialty"]; name = "lawyer_find_nearby"
+    else:
+        q = f"What's the weather like in {city} today?"
+        gold = {"location": [full]}
+        props = {"location": {"type": "string",
+                              "description": "The city and state, formatted as City, State."}}
+        req = ["location"]; name = "get_weather"
+    return item(q, name, {"_desc": f"Look up {name.replace('_',' ')}.", **props}, req, gold, f"f_city_{i}")
+
+
+def fam_boolparam(rng, i):
+    """Boolean params as JSON literals, from include/exclude phrasing."""
+    kind = rng.choice(["include", "include_all", "flag_false"])
+    thing = rng.choice(["archived items", "inactive users", "past events",
+                        "out-of-stock products", "completed orders"])
+    if kind == "include":
+        q = f"List my inventory, including {thing}."
+        gold = {"category": ["all"], "include_archived": [True]}
+        props = {"category": {"type": "string", "description": "one of: all, active, pending"},
+                 "include_archived": {"type": "boolean", "description": "Include archived items; default false"}}
+        req = ["category"]; name = "inventory_list"
+    elif kind == "include_all":
+        det = rng.choice(["full", "complete", "detailed"])
+        q = f"Get the {det} sales data."
+        gold = {"data_type": ["sales"], "include_all": [True]}
+        props = {"data_type": {"type": "string", "description": "one of: sales, revenue, inventory"},
+                 "include_all": {"type": "boolean", "description": "Whether to include all records. Default is false."}}
+        req = ["data_type", "include_all"]; name = "sales_data"
+    else:
+        q = f"Show me the movies, excluding {thing}."
+        gold = {"category": ["all"], "include_upcoming": [False]}
+        props = {"category": {"type": "string", "description": "one of: all, in_theaters, upcoming"},
+                 "include_upcoming": {"type": "boolean", "description": "include upcoming releases; default false"}}
+        req = ["category", "include_upcoming"]; name = "movies_list"
+    return item(q, name, {"_desc": f"List {name.replace('_',' ')}.", **props}, req, gold, f"f_bool_{i}")
+
+
+def fam_canonlist(rng, i):
+    """Canonical list elements: typed items, canonical words, order-agnostic pairs."""
+    kind = rng.choice(["floors", "avoid", "facilities"])
+    if kind == "floors":
+        k = rng.randint(2, 4)
+        floors = rng.sample(range(1, 13), k)
+        q = (f"Which floors of the building have conference rooms? "
+             f"Check floors {', '.join(str(f) for f in floors)}.")
+        gold = {"floors": [floors]}
+        props = {"floors": {"type": "array", "items": {"type": "integer"},
+                            "description": "The floor numbers."}}
+        req = ["floors"]; name = "conference_room_lookup"
+    elif kind == "avoid":
+        phrase = rng.choice(["highways and toll roads", "toll roads and highways",
+                             "ferries and toll roads", "highways and ferries"])
+        words = phrase.replace("toll roads", "tolls").split(" and ")
+        q = f"Get driving directions from New York to Boston avoiding {phrase}."
+        gold = {"start": ["New York"], "end": ["Boston"],
+                "avoid": [words, list(reversed(words))]}
+        props = {"start": {"type": "string"}, "end": {"type": "string"},
+                 "avoid": {"type": "array", "items": {"type": "string"},
+                           "description": "Road types to avoid; each element must be one of: highways, tolls, ferries"}}
+        req = ["start", "end", "avoid"]; name = "map_service_get_directions"
+    else:
+        phrase, canon = rng.choice([
+            ("the English fiction section and Wi-Fi", ["Fiction", "Wi-Fi"]),
+            ("Wi-Fi and the science section", ["Wi-Fi", "Science"]),
+            ("the children's area and quiet study rooms", ["Children's", "Quiet Study"])])
+        q = f"Find libraries in Boston with {phrase}."
+        gold = {"location": ["Boston, MA"], "facilities": [canon, list(reversed(canon))]}
+        props = {"location": {"type": "string", "description": "The city and state, e.g. Boston, MA"},
+                 "facilities": {"type": "array", "items": {"type": "string"},
+                                "description": "each element must be one of: Fiction, Non-Fiction, Science, Children's, Wi-Fi, Quiet Study"}}
+        req = ["location", "facilities"]; name = "public_library_find_nearby"
+    return item(q, name, {"_desc": f"Look up {name.replace('_',' ')}.", **props}, req, gold, f"f_clist_{i}")
+
+
+def fam_round(rng, i):
+    """Numeric results rounded to a fixed number of decimals (pi, fractions)."""
+    kind = rng.choice(["pi", "fraction", "sqrt"])
+    if kind == "pi":
+        n = rng.choice([1, 2, 3, 4])
+        q = f"Compute {n} times pi, rounded to four decimal places."
+        gold = {"expression": [f"{n} * pi"], "result": [round(n * 3.141592653589793, 4)]}
+        props = {"expression": {"type": "string", "description": "The mathematical expression as a string."},
+                 "result": {"type": "float", "description": "The value rounded to four decimal places."}}
+        req = ["expression", "result"]; name = "evaluate_expression"
+    elif kind == "fraction":
+        num, den = rng.choice([(1, 2), (3, 4), (2, 3), (1, 4), (5, 8), (7, 8), (1, 3)])
+        q = f"What is {num}/{den} as a decimal, rounded to four decimal places?"
+        gold = {"numerator": [num], "denominator": [den],
+                "result": [round(num / den, 4)]}
+        props = {"numerator": {"type": "integer"}, "denominator": {"type": "integer"},
+                 "result": {"type": "float", "description": "The decimal value, rounded to four decimal places."}}
+        req = ["numerator", "denominator", "result"]; name = "fraction_to_decimal"
+    else:
+        n = rng.choice([2, 3, 5, 7, 10, 11, 13])
+        q = f"Compute the square root of {n}, rounded to two decimal places."
+        gold = {"number": [n], "result": [round(n ** 0.5, 2)]}
+        props = {"number": {"type": "integer"},
+                 "result": {"type": "float", "description": "The square root, rounded to two decimal places."}}
+        req = ["number", "result"]; name = "sqrt_calculator"
+    return item(q, name, {"_desc": f"Compute {name.replace('_',' ')}.", **props}, req, gold, f"f_round_{i}")
+
+
+def fam_semantic_default(rng, i):
+    """Question semantics select a param value the schema declares as default."""
+    kind = rng.choice(["top_n", "size", "format", "detail_flag", "time_limit"])
+    if kind == "top_n":
+        metric = rng.choice(["revenue", "attendance", "rating", "sales"])
+        q = f"Which stadium has the highest {metric}?"
+        gold = {"metric": [metric], "top_n": [1]}
+        props = {"metric": {"type": "string", "description": "one of: revenue, attendance, rating, sales"},
+                 "top_n": {"type": "integer", "description": "Number of results to return. Default is 1."}}
+        req = ["metric", "top_n"]; name = "stadium_ranking"
+    elif kind == "size":
+        item_name = rng.choice(["coffee", "smoothie", "pizza", "popcorn"])
+        word, val = rng.choice([("a small", "small"), ("a large", "large"),
+                                ("a medium", "medium")])
+        q = f"I'd like {word} {item_name}."
+        gold = {"item": [item_name], "size": [val]}
+        props = {"item": {"type": "string"},
+                 "size": {"type": "string", "enum": ["small", "medium", "large"],
+                          "description": "The size. Default is medium."}}
+        req = ["item", "size"]; name = "order_item"
+    elif kind == "format":
+        phrase, val = rng.choice([
+            ("as year-month-day", "YYYY-MM-DD"), ("as month-day-year", "MM-DD-YYYY"),
+            ("as day-month-year", "DD-MM-YYYY")])
+        y, m, d = rng.choice([(2022, 8, 16), (2023, 1, 5), (2021, 12, 31)])
+        q = f"Return the date {y}-{m:02d}-{d:02d} {phrase}."
+        gold = {"date": [f"{y}-{m:02d}-{d:02d}"], "format": [val]}
+        props = {"date": {"type": "string", "description": "The date in ISO format."},
+                 "format": {"type": "string", "description": "The output date format. Default is YYYY-MM-DD."}}
+        req = ["date", "format"]; name = "format_date"
+    elif kind == "detail_flag":
+        bg = rng.choice(["Ticket to Ride", "Catan", "Pandemic", "Wingspan"])
+        q = f"What are the key traits of {bg}?"
+        gold = {"name": [bg], "detail_level": ["basic"]}
+        props = {"name": {"type": "string"},
+                 "detail_level": {"type": "string", "enum": ["basic", "detailed"],
+                                  "description": "Level of detail. Default is basic."}}
+        req = ["name", "detail_level"]; name = "boardgame_get_info"
+    else:
+        minutes = rng.choice([10, 20, 30])
+        q = f"Generate a summary of the meeting transcript."
+        gold = {"length": ["short"], "time_limit_minutes": [minutes]}
+        props = {"length": {"type": "string", "enum": ["short", "medium", "long"],
+                             "description": "Summary length. Default is short."},
+                 "time_limit_minutes": {"type": "integer",
+                                        "description": "Maximum time for the summary. Default is 20."}}
+        req = ["length", "time_limit_minutes"]; name = "summarize_meeting"
+    return item(q, name, {"_desc": f"Query {name.replace('_',' ')}.", **props}, req, gold, f"f_sdef_{i}")
+
+
 FAMILIES = [
-    (fam_rate, 3000), (fam_canonical, 2000), (fam_date, 1400),
-    (fam_strnum, 1000), (fam_dict, 1800), (fam_list, 1400),
-    (fam_plain, 2000), (fam_optional, 1200),
-    (fam_enum, 2500), (fam_unit, 1800), (fam_time24, 1200),
-    (fam_ticker, 1200), (fam_trim, 2200), (fam_mathsyntax, 1200),
+    (fam_rate, 2500), (fam_canonical, 1500), (fam_date, 2200),
+    (fam_strnum, 2000), (fam_dict, 1500), (fam_list, 1400),
+    (fam_plain, 1500), (fam_optional, 1500),
+    (fam_enum, 3500), (fam_unit, 2000), (fam_time24, 1000),
+    (fam_ticker, 1000), (fam_trim, 2500), (fam_mathsyntax, 1200),
     (fam_knowledge, 600),
+    (fam_citystate, 2000), (fam_boolparam, 1500), (fam_canonlist, 2000),
+    (fam_round, 1200), (fam_semantic_default, 2000),
 ]
 
 SYSTEM = ("You are an expert in composing functions. You are given a question and a set of possible functions. "
