@@ -1,0 +1,217 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 12628.22it/s]
+arm=last_adaptive layers=1 alpha=adaptive rows=13784 reward=snips base=/root/models/Qwen3.5-0.8B
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+step 0/2000 reward 0.468 |g_ppo| 11.0362 |g_sphere| 4.54e+06 lambda 2.432e-09 sph 3.594e+04 elapsed 7s
+step 10/2000 reward 0.534 |g_ppo| 12.1797 |g_sphere| 1.03e+07 lambda 1.186e-09 sph 6.133e+04 elapsed 38s
+step 20/2000 reward 0.653 |g_ppo| 8.3641 |g_sphere| 1.11e+07 lambda 7.532e-10 sph 6.578e+04 elapsed 69s
+step 30/2000 reward 0.566 |g_ppo| 9.7694 |g_sphere| 1.07e+07 lambda 9.112e-10 sph 6.71e+04 elapsed 100s
+step 40/2000 reward 0.613 |g_ppo| 12.7486 |g_sphere| 1.65e+07 lambda 7.738e-10 sph 8.183e+04 elapsed 129s
+step 50/2000 reward 0.680 |g_ppo| 11.7207 |g_sphere| 2.63e+07 lambda 4.450e-10 sph 1.12e+05 elapsed 157s
+step 60/2000 reward 0.613 |g_ppo| 8.8618 |g_sphere| 4.22e+07 lambda 2.100e-10 sph 1.552e+05 elapsed 186s
+step 70/2000 reward 0.630 |g_ppo| 8.4909 |g_sphere| 4.56e+07 lambda 1.864e-10 sph 1.605e+05 elapsed 214s
+step 80/2000 reward 0.739 |g_ppo| 10.8477 |g_sphere| 5.87e+07 lambda 1.848e-10 sph 1.965e+05 elapsed 243s
+step 90/2000 reward 0.565 |g_ppo| 13.8096 |g_sphere| 6.98e+07 lambda 1.980e-10 sph 2.377e+05 elapsed 271s
+step 100/2000 reward 0.566 |g_ppo| 43.9193 |g_sphere| 6.39e+07 lambda 6.873e-10 sph 2.214e+05 elapsed 298s
+step 110/2000 reward 0.652 |g_ppo| 16.0164 |g_sphere| 7.92e+07 lambda 2.023e-10 sph 2.735e+05 elapsed 326s
+step 120/2000 reward 0.657 |g_ppo| 10.8409 |g_sphere| 7.98e+07 lambda 1.358e-10 sph 2.942e+05 elapsed 354s
+step 130/2000 reward 0.585 |g_ppo| 20.7997 |g_sphere| 8.23e+07 lambda 2.526e-10 sph 3.279e+05 elapsed 381s
+step 140/2000 reward 0.593 |g_ppo| 19.6074 |g_sphere| 1.01e+08 lambda 1.938e-10 sph 4.197e+05 elapsed 407s
+step 150/2000 reward 0.568 |g_ppo| 34.1674 |g_sphere| 1.21e+08 lambda 2.828e-10 sph 4.703e+05 elapsed 433s
+step 160/2000 reward 0.684 |g_ppo| 30.3255 |g_sphere| 1.18e+08 lambda 2.573e-10 sph 4.815e+05 elapsed 459s
+step 170/2000 reward 0.581 |g_ppo| 15.1866 |g_sphere| 1.36e+08 lambda 1.119e-10 sph 5.464e+05 elapsed 485s
+step 180/2000 reward 0.301 |g_ppo| 29.7581 |g_sphere| 1.1e+08 lambda 2.708e-10 sph 4.092e+05 elapsed 513s
+step 190/2000 reward 0.748 |g_ppo| 23.9836 |g_sphere| 8.82e+07 lambda 2.719e-10 sph 3.257e+05 elapsed 540s
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.21s/it]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.21s/it]
+step 200/2000 reward 0.615 |g_ppo| 10.7931 |g_sphere| 9.35e+07 lambda 1.155e-10 sph 3.667e+05 elapsed 569s
+step 210/2000 reward 0.779 |g_ppo| 18.1858 |g_sphere| 9.38e+07 lambda 1.939e-10 sph 3.792e+05 elapsed 597s
+step 220/2000 reward 0.770 |g_ppo| 18.0814 |g_sphere| 1e+08 lambda 1.803e-10 sph 3.735e+05 elapsed 622s
+step 230/2000 reward 0.725 |g_ppo| 14.8781 |g_sphere| 8.79e+07 lambda 1.693e-10 sph 3.481e+05 elapsed 649s
+step 240/2000 reward 0.732 |g_ppo| 23.1701 |g_sphere| 1.18e+08 lambda 1.965e-10 sph 4.34e+05 elapsed 676s
+step 250/2000 reward 0.694 |g_ppo| 15.7102 |g_sphere| 1.06e+08 lambda 1.483e-10 sph 3.761e+05 elapsed 701s
+step 260/2000 reward 0.716 |g_ppo| 20.2418 |g_sphere| 1.24e+08 lambda 1.636e-10 sph 4.512e+05 elapsed 726s
+step 270/2000 reward 0.745 |g_ppo| 15.7727 |g_sphere| 1.09e+08 lambda 1.445e-10 sph 4.336e+05 elapsed 752s
+step 280/2000 reward 0.737 |g_ppo| 30.8173 |g_sphere| 1.24e+08 lambda 2.481e-10 sph 4.411e+05 elapsed 778s
+step 290/2000 reward 0.332 |g_ppo| 24.5626 |g_sphere| 1.21e+08 lambda 2.033e-10 sph 4.55e+05 elapsed 804s
+step 300/2000 reward 0.745 |g_ppo| 20.1575 |g_sphere| 1.47e+08 lambda 1.375e-10 sph 6.03e+05 elapsed 829s
+step 310/2000 reward 0.773 |g_ppo| 37.3504 |g_sphere| 1.23e+08 lambda 3.026e-10 sph 5.013e+05 elapsed 856s
+step 320/2000 reward 0.645 |g_ppo| 22.7120 |g_sphere| 1.15e+08 lambda 1.981e-10 sph 4.617e+05 elapsed 881s
+step 330/2000 reward 0.650 |g_ppo| 13.8417 |g_sphere| 1.33e+08 lambda 1.041e-10 sph 5.924e+05 elapsed 907s
+step 340/2000 reward 0.697 |g_ppo| 27.8302 |g_sphere| 1.04e+08 lambda 2.667e-10 sph 4.632e+05 elapsed 933s
+step 350/2000 reward 0.671 |g_ppo| 34.5944 |g_sphere| 1.27e+08 lambda 2.730e-10 sph 5.543e+05 elapsed 959s
+step 360/2000 reward 0.735 |g_ppo| 26.6314 |g_sphere| 1.21e+08 lambda 2.195e-10 sph 5.291e+05 elapsed 987s
+step 370/2000 reward 0.789 |g_ppo| 27.4375 |g_sphere| 1.3e+08 lambda 2.109e-10 sph 5.8e+05 elapsed 1013s
+step 380/2000 reward 0.668 |g_ppo| 18.1495 |g_sphere| 1.49e+08 lambda 1.220e-10 sph 6.562e+05 elapsed 1040s
+step 390/2000 reward 0.933 |g_ppo| 0.0000 |g_sphere| 1.39e+08 lambda 0.000e+00 sph 6.289e+05 elapsed 1066s
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.26s/it]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.26s/it]
+step 400/2000 reward 0.778 |g_ppo| 13.0330 |g_sphere| 1.26e+08 lambda 1.033e-10 sph 5.336e+05 elapsed 1095s
+step 410/2000 reward 0.683 |g_ppo| 32.0642 |g_sphere| 1.27e+08 lambda 2.526e-10 sph 5.361e+05 elapsed 1121s
+step 420/2000 reward 0.698 |g_ppo| 34.3453 |g_sphere| 1.36e+08 lambda 2.528e-10 sph 5.472e+05 elapsed 1148s
+step 430/2000 reward 0.822 |g_ppo| 14.4755 |g_sphere| 1.49e+08 lambda 9.693e-11 sph 6.462e+05 elapsed 1176s
+step 440/2000 reward 0.811 |g_ppo| 29.8063 |g_sphere| 1.39e+08 lambda 2.140e-10 sph 5.939e+05 elapsed 1202s
+step 450/2000 reward 0.867 |g_ppo| 25.0124 |g_sphere| 1.57e+08 lambda 1.592e-10 sph 7.151e+05 elapsed 1228s
+step 460/2000 reward 0.690 |g_ppo| 27.5255 |g_sphere| 1.44e+08 lambda 1.918e-10 sph 6.333e+05 elapsed 1254s
+step 470/2000 reward 0.915 |g_ppo| 3.6925 |g_sphere| 1.62e+08 lambda 2.276e-11 sph 6.877e+05 elapsed 1280s
+step 480/2000 reward 0.710 |g_ppo| 66.8200 |g_sphere| 1.71e+08 lambda 3.901e-10 sph 7.285e+05 elapsed 1306s
+step 490/2000 reward 0.745 |g_ppo| 30.0147 |g_sphere| 1.4e+08 lambda 2.143e-10 sph 6.053e+05 elapsed 1332s
+step 500/2000 reward 0.666 |g_ppo| 5.2274 |g_sphere| 1.45e+08 lambda 3.603e-11 sph 6.19e+05 elapsed 1358s
+step 510/2000 reward 0.882 |g_ppo| 40.2317 |g_sphere| 1.44e+08 lambda 2.798e-10 sph 6.317e+05 elapsed 1385s
+step 520/2000 reward 0.779 |g_ppo| 17.9773 |g_sphere| 1.27e+08 lambda 1.420e-10 sph 5.391e+05 elapsed 1411s
+step 530/2000 reward 0.824 |g_ppo| 66.9292 |g_sphere| 1.54e+08 lambda 4.357e-10 sph 6.514e+05 elapsed 1437s
+step 540/2000 reward 0.817 |g_ppo| 20.2903 |g_sphere| 1.5e+08 lambda 1.351e-10 sph 6.69e+05 elapsed 1463s
+step 550/2000 reward 0.703 |g_ppo| 0.0000 |g_sphere| 1.46e+08 lambda 0.000e+00 sph 6.612e+05 elapsed 1489s
+step 560/2000 reward 0.654 |g_ppo| 0.0000 |g_sphere| 1.65e+08 lambda 0.000e+00 sph 7.329e+05 elapsed 1515s
+step 570/2000 reward 0.850 |g_ppo| 0.0000 |g_sphere| 1.63e+08 lambda 0.000e+00 sph 7.538e+05 elapsed 1540s
+step 580/2000 reward 0.871 |g_ppo| 0.0000 |g_sphere| 1.67e+08 lambda 0.000e+00 sph 7.638e+05 elapsed 1566s
+step 590/2000 reward 0.788 |g_ppo| 26.2124 |g_sphere| 1.4e+08 lambda 1.876e-10 sph 6.172e+05 elapsed 1592s
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.22s/it]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.22s/it]
+step 600/2000 reward 0.686 |g_ppo| 7.0940 |g_sphere| 1.56e+08 lambda 4.537e-11 sph 6.792e+05 elapsed 1620s
+step 610/2000 reward 0.831 |g_ppo| 64.3704 |g_sphere| 1.59e+08 lambda 4.058e-10 sph 6.558e+05 elapsed 1646s
+step 620/2000 reward 0.774 |g_ppo| 8.1449 |g_sphere| 1.75e+08 lambda 4.657e-11 sph 6.796e+05 elapsed 1672s
+step 630/2000 reward 0.600 |g_ppo| 0.0000 |g_sphere| 1.55e+08 lambda 0.000e+00 sph 6.117e+05 elapsed 1698s
+step 640/2000 reward 0.744 |g_ppo| 16.2260 |g_sphere| 1.77e+08 lambda 9.192e-11 sph 7.572e+05 elapsed 1724s
+step 650/2000 reward 0.821 |g_ppo| 0.0000 |g_sphere| 1.94e+08 lambda 0.000e+00 sph 8.21e+05 elapsed 1759s
+step 660/2000 reward 0.845 |g_ppo| 26.1372 |g_sphere| 1.88e+08 lambda 1.393e-10 sph 8.021e+05 elapsed 1786s
+step 670/2000 reward 0.738 |g_ppo| 11.0529 |g_sphere| 1.58e+08 lambda 7.014e-11 sph 6.896e+05 elapsed 1812s
+step 680/2000 reward 0.798 |g_ppo| 24.0021 |g_sphere| 1.76e+08 lambda 1.363e-10 sph 7.205e+05 elapsed 1838s
+step 690/2000 reward 0.771 |g_ppo| 0.0000 |g_sphere| 1.98e+08 lambda 0.000e+00 sph 8.813e+05 elapsed 1864s
+step 700/2000 reward 0.729 |g_ppo| 20.9515 |g_sphere| 1.68e+08 lambda 1.246e-10 sph 7.611e+05 elapsed 1890s
+step 710/2000 reward 0.754 |g_ppo| 10.5054 |g_sphere| 1.68e+08 lambda 6.264e-11 sph 7.41e+05 elapsed 1916s
+step 720/2000 reward 0.871 |g_ppo| 47.1038 |g_sphere| 1.96e+08 lambda 2.403e-10 sph 8.546e+05 elapsed 1944s
+step 730/2000 reward 0.755 |g_ppo| 0.0000 |g_sphere| 2.06e+08 lambda 0.000e+00 sph 9.05e+05 elapsed 1969s
+step 740/2000 reward 0.825 |g_ppo| 11.7967 |g_sphere| 1.85e+08 lambda 6.376e-11 sph 7.571e+05 elapsed 1995s
+step 750/2000 reward 0.821 |g_ppo| 0.0000 |g_sphere| 2.16e+08 lambda 0.000e+00 sph 8.885e+05 elapsed 2021s
+step 760/2000 reward 0.578 |g_ppo| 29.7686 |g_sphere| 1.93e+08 lambda 1.545e-10 sph 8.094e+05 elapsed 2047s
+step 770/2000 reward 0.745 |g_ppo| 43.7365 |g_sphere| 1.89e+08 lambda 2.311e-10 sph 8.855e+05 elapsed 2075s
+step 780/2000 reward 0.780 |g_ppo| 0.0000 |g_sphere| 1.88e+08 lambda 0.000e+00 sph 8.967e+05 elapsed 2100s
+step 790/2000 reward 0.784 |g_ppo| 23.2259 |g_sphere| 1.82e+08 lambda 1.279e-10 sph 8.208e+05 elapsed 2125s
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.18s/it]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.18s/it]
+step 800/2000 reward 0.737 |g_ppo| 49.1163 |g_sphere| 1.87e+08 lambda 2.623e-10 sph 8.777e+05 elapsed 2152s
+step 810/2000 reward 0.850 |g_ppo| 18.5189 |g_sphere| 1.99e+08 lambda 9.323e-11 sph 9.054e+05 elapsed 2178s
+step 820/2000 reward 0.913 |g_ppo| 0.0000 |g_sphere| 2.09e+08 lambda 0.000e+00 sph 9.916e+05 elapsed 2203s
+step 830/2000 reward 0.766 |g_ppo| 37.3777 |g_sphere| 1.9e+08 lambda 1.966e-10 sph 8.442e+05 elapsed 2228s
+step 840/2000 reward 0.788 |g_ppo| 38.4466 |g_sphere| 1.82e+08 lambda 2.109e-10 sph 8.287e+05 elapsed 2253s
+step 850/2000 reward 0.733 |g_ppo| 29.8661 |g_sphere| 1.76e+08 lambda 1.693e-10 sph 8.332e+05 elapsed 2279s
+step 860/2000 reward 0.803 |g_ppo| 55.8189 |g_sphere| 1.83e+08 lambda 3.044e-10 sph 8.819e+05 elapsed 2305s
+step 870/2000 reward 0.850 |g_ppo| 0.0000 |g_sphere| 1.8e+08 lambda 0.000e+00 sph 8.346e+05 elapsed 2330s
+step 880/2000 reward 0.813 |g_ppo| 9.2737 |g_sphere| 1.75e+08 lambda 5.293e-11 sph 8.219e+05 elapsed 2355s
+step 890/2000 reward 0.696 |g_ppo| 52.2202 |g_sphere| 1.74e+08 lambda 3.000e-10 sph 8.364e+05 elapsed 2381s
+step 900/2000 reward 0.589 |g_ppo| 13.9330 |g_sphere| 1.62e+08 lambda 8.578e-11 sph 7.78e+05 elapsed 2407s
+step 910/2000 reward 0.838 |g_ppo| 28.5059 |g_sphere| 1.41e+08 lambda 2.021e-10 sph 6.806e+05 elapsed 2435s
+step 920/2000 reward 0.733 |g_ppo| 15.8732 |g_sphere| 1.58e+08 lambda 1.004e-10 sph 7.291e+05 elapsed 2460s
+step 930/2000 reward 0.802 |g_ppo| 24.5723 |g_sphere| 1.71e+08 lambda 1.436e-10 sph 8.492e+05 elapsed 2487s
+step 940/2000 reward 0.740 |g_ppo| 19.1134 |g_sphere| 1.74e+08 lambda 1.096e-10 sph 8.423e+05 elapsed 2513s
+step 950/2000 reward 0.689 |g_ppo| 26.7455 |g_sphere| 1.42e+08 lambda 1.888e-10 sph 6.549e+05 elapsed 2539s
+step 960/2000 reward 0.834 |g_ppo| 25.4135 |g_sphere| 1.85e+08 lambda 1.371e-10 sph 7.966e+05 elapsed 2566s
+step 970/2000 reward 0.638 |g_ppo| 75.2985 |g_sphere| 1.78e+08 lambda 4.231e-10 sph 7.39e+05 elapsed 2591s
+step 980/2000 reward 0.829 |g_ppo| 43.1594 |g_sphere| 1.85e+08 lambda 2.332e-10 sph 7.804e+05 elapsed 2617s
+step 990/2000 reward 0.768 |g_ppo| 38.4654 |g_sphere| 1.65e+08 lambda 2.333e-10 sph 7.359e+05 elapsed 2642s
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.25s/it]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.25s/it]
+step 1000/2000 reward 0.685 |g_ppo| 48.6226 |g_sphere| 1.87e+08 lambda 2.607e-10 sph 8.657e+05 elapsed 2669s
+step 1010/2000 reward 0.811 |g_ppo| 30.0954 |g_sphere| 2.03e+08 lambda 1.484e-10 sph 9.181e+05 elapsed 2694s
+step 1020/2000 reward 0.821 |g_ppo| 0.0000 |g_sphere| 1.89e+08 lambda 0.000e+00 sph 8.457e+05 elapsed 2719s
+step 1030/2000 reward 0.791 |g_ppo| 14.4717 |g_sphere| 1.79e+08 lambda 8.069e-11 sph 6.985e+05 elapsed 2746s
+step 1040/2000 reward 0.804 |g_ppo| 14.3191 |g_sphere| 1.9e+08 lambda 7.547e-11 sph 7.15e+05 elapsed 2772s
+step 1050/2000 reward 0.887 |g_ppo| 0.0000 |g_sphere| 2.15e+08 lambda 0.000e+00 sph 7.644e+05 elapsed 2798s
+step 1060/2000 reward 0.891 |g_ppo| 13.3613 |g_sphere| 1.92e+08 lambda 6.977e-11 sph 6.955e+05 elapsed 2824s
+step 1070/2000 reward 0.798 |g_ppo| 65.5190 |g_sphere| 2.04e+08 lambda 3.206e-10 sph 7.674e+05 elapsed 2850s
+step 1080/2000 reward 0.743 |g_ppo| 27.6690 |g_sphere| 2.15e+08 lambda 1.284e-10 sph 8.527e+05 elapsed 2876s
+step 1090/2000 reward 0.915 |g_ppo| 17.8015 |g_sphere| 1.84e+08 lambda 9.694e-11 sph 8.067e+05 elapsed 2902s
+step 1100/2000 reward 0.800 |g_ppo| 0.0000 |g_sphere| 1.97e+08 lambda 0.000e+00 sph 9.219e+05 elapsed 2929s
+step 1110/2000 reward 0.784 |g_ppo| 30.6051 |g_sphere| 1.61e+08 lambda 1.898e-10 sph 6.775e+05 elapsed 2956s
+step 1120/2000 reward 0.764 |g_ppo| 25.4565 |g_sphere| 1.89e+08 lambda 1.345e-10 sph 8.634e+05 elapsed 2983s
+step 1130/2000 reward 0.624 |g_ppo| 16.7594 |g_sphere| 1.58e+08 lambda 1.062e-10 sph 7.403e+05 elapsed 3009s
+step 1140/2000 reward 0.905 |g_ppo| 8.9500 |g_sphere| 1.64e+08 lambda 5.467e-11 sph 8.197e+05 elapsed 3035s
+step 1150/2000 reward 0.787 |g_ppo| 18.1384 |g_sphere| 1.73e+08 lambda 1.049e-10 sph 9.199e+05 elapsed 3062s
+step 1160/2000 reward 0.465 |g_ppo| 33.1246 |g_sphere| 1.68e+08 lambda 1.971e-10 sph 8.218e+05 elapsed 3089s
+step 1170/2000 reward 0.873 |g_ppo| 20.8572 |g_sphere| 1.68e+08 lambda 1.239e-10 sph 8.221e+05 elapsed 3116s
+step 1180/2000 reward 0.824 |g_ppo| 28.9614 |g_sphere| 1.88e+08 lambda 1.539e-10 sph 8.947e+05 elapsed 3145s
+step 1190/2000 reward 0.770 |g_ppo| 32.8986 |g_sphere| 1.8e+08 lambda 1.825e-10 sph 9.474e+05 elapsed 3174s
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.16s/it]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.16s/it]
+step 1200/2000 reward 0.745 |g_ppo| 9.6782 |g_sphere| 1.56e+08 lambda 6.218e-11 sph 8.182e+05 elapsed 3202s
+step 1210/2000 reward 0.729 |g_ppo| 35.7124 |g_sphere| 1.77e+08 lambda 2.013e-10 sph 8.977e+05 elapsed 3228s
+step 1220/2000 reward 0.698 |g_ppo| 39.0600 |g_sphere| 1.66e+08 lambda 2.353e-10 sph 8.341e+05 elapsed 3254s
+step 1230/2000 reward 0.814 |g_ppo| 15.0102 |g_sphere| 1.74e+08 lambda 8.623e-11 sph 9.112e+05 elapsed 3281s
+step 1240/2000 reward 0.866 |g_ppo| 48.5766 |g_sphere| 1.67e+08 lambda 2.901e-10 sph 8.885e+05 elapsed 3308s
+step 1250/2000 reward 0.810 |g_ppo| 43.6927 |g_sphere| 1.69e+08 lambda 2.584e-10 sph 8.708e+05 elapsed 3334s
+step 1260/2000 reward 0.858 |g_ppo| 18.3111 |g_sphere| 1.61e+08 lambda 1.134e-10 sph 7.895e+05 elapsed 3362s
+step 1270/2000 reward 0.792 |g_ppo| 29.8485 |g_sphere| 1.84e+08 lambda 1.624e-10 sph 9.41e+05 elapsed 3388s
+step 1280/2000 reward 0.830 |g_ppo| 0.0000 |g_sphere| 2.09e+08 lambda 0.000e+00 sph 1.093e+06 elapsed 3415s
+step 1290/2000 reward 0.872 |g_ppo| 14.7908 |g_sphere| 1.76e+08 lambda 8.395e-11 sph 9.103e+05 elapsed 3441s
+step 1300/2000 reward 0.866 |g_ppo| 14.4157 |g_sphere| 1.82e+08 lambda 7.911e-11 sph 9.185e+05 elapsed 3469s
+step 1310/2000 reward 0.771 |g_ppo| 32.2472 |g_sphere| 1.63e+08 lambda 1.977e-10 sph 8.261e+05 elapsed 3495s
+step 1320/2000 reward 0.833 |g_ppo| 0.0000 |g_sphere| 1.86e+08 lambda 0.000e+00 sph 9.02e+05 elapsed 3522s
+step 1330/2000 reward 0.761 |g_ppo| 4.5355 |g_sphere| 1.83e+08 lambda 2.483e-11 sph 9.052e+05 elapsed 3548s
+step 1340/2000 reward 0.948 |g_ppo| 2.9646 |g_sphere| 1.95e+08 lambda 1.518e-11 sph 9.146e+05 elapsed 3575s
+step 1350/2000 reward 0.929 |g_ppo| 22.6188 |g_sphere| 2.09e+08 lambda 1.082e-10 sph 9.338e+05 elapsed 3602s
+step 1360/2000 reward 0.903 |g_ppo| 9.8677 |g_sphere| 1.97e+08 lambda 5.009e-11 sph 9.437e+05 elapsed 3629s
+step 1370/2000 reward 0.800 |g_ppo| 0.0000 |g_sphere| 2.06e+08 lambda 0.000e+00 sph 9.021e+05 elapsed 3657s
+step 1380/2000 reward 0.896 |g_ppo| 8.9750 |g_sphere| 2.01e+08 lambda 4.475e-11 sph 8.959e+05 elapsed 3685s
+step 1390/2000 reward 0.784 |g_ppo| 13.3381 |g_sphere| 2.1e+08 lambda 6.342e-11 sph 9.458e+05 elapsed 3711s
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.25s/it]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.25s/it]
+step 1400/2000 reward 0.900 |g_ppo| 11.2523 |g_sphere| 2.28e+08 lambda 4.939e-11 sph 1.08e+06 elapsed 3740s
+step 1410/2000 reward 0.896 |g_ppo| 0.0000 |g_sphere| 2e+08 lambda 0.000e+00 sph 9.564e+05 elapsed 3767s
+step 1420/2000 reward 0.865 |g_ppo| 45.9021 |g_sphere| 1.83e+08 lambda 2.506e-10 sph 8.584e+05 elapsed 3793s
+step 1430/2000 reward 0.747 |g_ppo| 6.8726 |g_sphere| 2.01e+08 lambda 3.427e-11 sph 9.63e+05 elapsed 3820s
+step 1440/2000 reward 0.980 |g_ppo| 1.5091 |g_sphere| 1.73e+08 lambda 8.727e-12 sph 9.148e+05 elapsed 3846s
+step 1450/2000 reward 0.736 |g_ppo| 40.4525 |g_sphere| 1.6e+08 lambda 2.526e-10 sph 8.016e+05 elapsed 3873s
+step 1460/2000 reward 0.893 |g_ppo| 0.0000 |g_sphere| 1.61e+08 lambda 0.000e+00 sph 8.538e+05 elapsed 3899s
+step 1470/2000 reward 0.916 |g_ppo| 45.5475 |g_sphere| 1.72e+08 lambda 2.647e-10 sph 8.797e+05 elapsed 3925s
+step 1480/2000 reward 0.808 |g_ppo| 36.6495 |g_sphere| 1.83e+08 lambda 2.004e-10 sph 9.367e+05 elapsed 3951s
+step 1490/2000 reward 0.767 |g_ppo| 46.7166 |g_sphere| 1.58e+08 lambda 2.948e-10 sph 8.068e+05 elapsed 3978s
+step 1500/2000 reward 0.932 |g_ppo| 31.3657 |g_sphere| 1.74e+08 lambda 1.802e-10 sph 8.504e+05 elapsed 4004s
+step 1510/2000 reward 0.890 |g_ppo| 57.2057 |g_sphere| 1.94e+08 lambda 2.947e-10 sph 8.994e+05 elapsed 4031s
+step 1520/2000 reward 0.920 |g_ppo| 0.0000 |g_sphere| 1.88e+08 lambda 0.000e+00 sph 8.925e+05 elapsed 4059s
+step 1530/2000 reward 0.848 |g_ppo| 18.7241 |g_sphere| 1.76e+08 lambda 1.064e-10 sph 7.945e+05 elapsed 4088s
+step 1540/2000 reward 0.913 |g_ppo| 16.8506 |g_sphere| 2.15e+08 lambda 7.855e-11 sph 9.801e+05 elapsed 4115s
+step 1550/2000 reward 0.840 |g_ppo| 17.4232 |g_sphere| 2.02e+08 lambda 8.606e-11 sph 8.892e+05 elapsed 4144s
+step 1560/2000 reward 0.962 |g_ppo| 14.2184 |g_sphere| 1.86e+08 lambda 7.624e-11 sph 8.437e+05 elapsed 4173s
+step 1570/2000 reward 0.727 |g_ppo| 19.1907 |g_sphere| 2.08e+08 lambda 9.206e-11 sph 9.061e+05 elapsed 4201s
+step 1580/2000 reward 0.821 |g_ppo| 9.4637 |g_sphere| 2.16e+08 lambda 4.386e-11 sph 9.656e+05 elapsed 4229s
+step 1590/2000 reward 0.687 |g_ppo| 27.9723 |g_sphere| 1.99e+08 lambda 1.407e-10 sph 9.062e+05 elapsed 4256s
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.22s/it]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.22s/it]
+step 1600/2000 reward 0.914 |g_ppo| 26.1038 |g_sphere| 2.16e+08 lambda 1.210e-10 sph 9.625e+05 elapsed 4286s
+step 1610/2000 reward 0.917 |g_ppo| 27.8154 |g_sphere| 2e+08 lambda 1.392e-10 sph 9.07e+05 elapsed 4315s
+step 1620/2000 reward 0.888 |g_ppo| 43.1985 |g_sphere| 1.95e+08 lambda 2.214e-10 sph 9.135e+05 elapsed 4343s
+step 1630/2000 reward 0.912 |g_ppo| 25.9801 |g_sphere| 2.15e+08 lambda 1.207e-10 sph 9.761e+05 elapsed 4370s
+step 1640/2000 reward 0.897 |g_ppo| 39.3101 |g_sphere| 2.06e+08 lambda 1.912e-10 sph 9.62e+05 elapsed 4398s
+step 1650/2000 reward 0.956 |g_ppo| 20.2230 |g_sphere| 2.07e+08 lambda 9.784e-11 sph 9.813e+05 elapsed 4426s
+step 1660/2000 reward 0.848 |g_ppo| 42.7332 |g_sphere| 1.92e+08 lambda 2.224e-10 sph 9.192e+05 elapsed 4454s
+step 1670/2000 reward 0.838 |g_ppo| 70.0813 |g_sphere| 2.15e+08 lambda 3.264e-10 sph 9.581e+05 elapsed 4483s
+step 1680/2000 reward 0.861 |g_ppo| 29.6841 |g_sphere| 2.14e+08 lambda 1.384e-10 sph 1.006e+06 elapsed 4509s
+step 1690/2000 reward 0.961 |g_ppo| 12.2647 |g_sphere| 2.28e+08 lambda 5.373e-11 sph 1.084e+06 elapsed 4537s
+step 1700/2000 reward 0.919 |g_ppo| 20.6183 |g_sphere| 2.29e+08 lambda 9.003e-11 sph 1.085e+06 elapsed 4567s
+step 1710/2000 reward 0.982 |g_ppo| 20.4428 |g_sphere| 2.24e+08 lambda 9.135e-11 sph 1.043e+06 elapsed 4595s
+step 1720/2000 reward 0.898 |g_ppo| 18.6613 |g_sphere| 2.41e+08 lambda 7.757e-11 sph 1.114e+06 elapsed 4623s
+step 1730/2000 reward 0.783 |g_ppo| 54.1196 |g_sphere| 2.12e+08 lambda 2.557e-10 sph 1.004e+06 elapsed 4652s
+step 1740/2000 reward 0.916 |g_ppo| 24.7629 |g_sphere| 2.02e+08 lambda 1.227e-10 sph 9.052e+05 elapsed 4682s
+step 1750/2000 reward 0.670 |g_ppo| 42.0431 |g_sphere| 2.18e+08 lambda 1.925e-10 sph 1.03e+06 elapsed 4713s
+step 1760/2000 reward 0.719 |g_ppo| 29.8095 |g_sphere| 2.1e+08 lambda 1.421e-10 sph 1.001e+06 elapsed 4741s
+step 1770/2000 reward 0.916 |g_ppo| 11.3731 |g_sphere| 2.15e+08 lambda 5.292e-11 sph 1.018e+06 elapsed 4770s
+step 1780/2000 reward 0.860 |g_ppo| 14.9632 |g_sphere| 2.06e+08 lambda 7.274e-11 sph 9.901e+05 elapsed 4798s
+step 1790/2000 reward 0.913 |g_ppo| 0.0000 |g_sphere| 1.92e+08 lambda 0.000e+00 sph 9.202e+05 elapsed 4827s
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.17s/it]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.17s/it]
+step 1800/2000 reward 0.698 |g_ppo| 22.7535 |g_sphere| 2.13e+08 lambda 1.069e-10 sph 1.018e+06 elapsed 4856s
+step 1810/2000 reward 0.965 |g_ppo| 10.5785 |g_sphere| 2.09e+08 lambda 5.065e-11 sph 9.963e+05 elapsed 4883s
+step 1820/2000 reward 0.524 |g_ppo| 25.9172 |g_sphere| 2.34e+08 lambda 1.108e-10 sph 1.098e+06 elapsed 4910s
+step 1830/2000 reward 0.837 |g_ppo| 11.7632 |g_sphere| 2.2e+08 lambda 5.352e-11 sph 1.056e+06 elapsed 4937s
+step 1840/2000 reward 0.835 |g_ppo| 48.5104 |g_sphere| 1.99e+08 lambda 2.441e-10 sph 9.24e+05 elapsed 4965s
+step 1850/2000 reward 0.750 |g_ppo| 0.0000 |g_sphere| 2.52e+08 lambda 0.000e+00 sph 1.213e+06 elapsed 4993s
+step 1860/2000 reward 0.981 |g_ppo| 18.7189 |g_sphere| 2.41e+08 lambda 7.773e-11 sph 1.142e+06 elapsed 5020s
+step 1870/2000 reward 0.961 |g_ppo| 13.0330 |g_sphere| 2.25e+08 lambda 5.790e-11 sph 1.045e+06 elapsed 5049s
+step 1880/2000 reward 0.907 |g_ppo| 37.4464 |g_sphere| 2.2e+08 lambda 1.702e-10 sph 9.907e+05 elapsed 5077s
+step 1890/2000 reward 0.943 |g_ppo| 18.4183 |g_sphere| 2.26e+08 lambda 8.150e-11 sph 1.087e+06 elapsed 5105s
+step 1900/2000 reward 0.980 |g_ppo| 31.4203 |g_sphere| 2.56e+08 lambda 1.228e-10 sph 1.196e+06 elapsed 5132s
+step 1910/2000 reward 0.927 |g_ppo| 28.1695 |g_sphere| 2.58e+08 lambda 1.092e-10 sph 1.182e+06 elapsed 5160s
+step 1920/2000 reward 0.976 |g_ppo| 6.8248 |g_sphere| 2.48e+08 lambda 2.752e-11 sph 1.164e+06 elapsed 5187s
+step 1930/2000 reward 0.774 |g_ppo| 19.9977 |g_sphere| 2.54e+08 lambda 7.888e-11 sph 1.164e+06 elapsed 5215s
+step 1940/2000 reward 0.887 |g_ppo| 22.2756 |g_sphere| 2.44e+08 lambda 9.122e-11 sph 1.157e+06 elapsed 5242s
+step 1950/2000 reward 0.778 |g_ppo| 1.6242 |g_sphere| 2.62e+08 lambda 6.205e-12 sph 1.172e+06 elapsed 5270s
+step 1960/2000 reward 0.933 |g_ppo| 0.0000 |g_sphere| 2.51e+08 lambda 0.000e+00 sph 1.151e+06 elapsed 5298s
+step 1970/2000 reward 0.901 |g_ppo| 21.1556 |g_sphere| 2.52e+08 lambda 8.398e-11 sph 1.123e+06 elapsed 5327s
+step 1980/2000 reward 0.916 |g_ppo| 23.2264 |g_sphere| 2.61e+08 lambda 8.897e-11 sph 1.117e+06 elapsed 5354s
+step 1990/2000 reward 0.959 |g_ppo| 10.6177 |g_sphere| 2.65e+08 lambda 4.000e-11 sph 1.201e+06 elapsed 5382s
+step 1999/2000 reward 0.849 |g_ppo| 19.4739 |g_sphere| 2.29e+08 lambda 8.501e-11 sph 1.04e+06 elapsed 5406s
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.17s/it]Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.17s/it]
+DONE arm=last_adaptive reward 0.4283104121685028 -> 0.8920613110065461 opts=2000 -> ckpt/snips-last_adaptive
