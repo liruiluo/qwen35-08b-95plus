@@ -5,7 +5,7 @@ cd "$(dirname "$0")/.."
 
 # SNIPS NLU benchmark (train + validate splits)
 if [ ! -d nlu-benchmark ]; then
-  git clone --depth 1 https://github.com/snipsco/nlu-benchmark.git
+  git clone --depth 1 https://github.com/sonos/nlu-benchmark.git
 fi
 
 # JointBERT-standard SNIPS split (13,084/700/700): the test-caliber corpus.

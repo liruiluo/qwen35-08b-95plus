@@ -127,7 +127,9 @@ protocol-B.
 - **SNIPS（主口径）**: JointBERT 标准划分 13,084/700/700
   （`snips/prepare_jointbert.py` 从 monologg/JointBERT 原始文件构建，
   行格式与官方语料版完全一致）。选择依据：SNIPS 官方仓库
-  （snipsco/nlu-benchmark）**不提供 test 划分**，而官方 train 文件
+  （snipsco/nlu-benchmark，2019 年 Snips 并入 Sonos 后迁移至
+  sonos/nlu-benchmark，旧地址自动重定向，本仓库脚本一律使用现行
+  sonos 地址）**不提供 test 划分**，而官方 train 文件
   （13,784 条）与文献标准 test 集重叠 464/700（大小写折叠后精确
   匹配）——在官方 train 上训练再报 test 数等于 train-on-test。完整
   实测与论证见 `results/EVALUATION_CALIBER.md` 与
