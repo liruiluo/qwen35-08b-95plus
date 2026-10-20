@@ -65,10 +65,29 @@ def read_split(src, split, system):
     return rows
 
 
+INTENT_DEFINITIONS = (
+    "Intent definitions:\n"
+    "- AddToPlaylist: add a track, album, or artist to an existing playlist "
+    "(\"add X to Y\", \"put X onto/into Y\" where Y is a playlist).\n"
+    "- BookRestaurant: reserve a table at a restaurant (party size, time, date, cuisine).\n"
+    "- GetWeather: ask about weather conditions or forecast for a place or time.\n"
+    "- PlayMusic: play, put on, listen to, hear, or open music - a song, artist, album, "
+    "playlist, EP, record, single, soundtrack, or genre - for listening now.\n"
+    "- RateBook: give a rating or review to a book.\n"
+    "- SearchCreativeWork: find, search for, or look up a creative work - a movie, show, "
+    "episode, game, trailer, or book - as content. Playing a non-music work (a movie, show, "
+    "game, or trailer) is also SearchCreativeWork; asking to play or hear music is PlayMusic instead.\n"
+    "- SearchScreeningEvent: find a movie screening - showtimes, theaters, or what "
+    "is playing near a place."
+)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", required=True, help="dir with {split}-{seq.in,seq.out,label}")
     ap.add_argument("--out-dir", default="data-jb")
+    ap.add_argument("--definitions", action="store_true",
+                    help="append intent definitions to the system prompt")
     args = ap.parse_args()
 
     train_raw = read_lines(os.path.join(args.src, "train-seq.in"))
@@ -81,6 +100,10 @@ def main():
         "You are a Natural Language Understanding engine for a voice assistant. "
         "Given a user utterance, predict (1) the intent and (2) all slot spans in the utterance.\n"
         f"Possible intents (choose exactly one): {', '.join(train_intents)}.\n"
+    )
+    if args.definitions:
+        system += INTENT_DEFINITIONS + "\n"
+    system += (
         f"Possible slot names: {', '.join(slot_names)}.\n"
         "A slot value must be the exact substring of the utterance that fills that slot. "
         "Only output slot spans that actually appear in the utterance; omit slots that are absent.\n"
