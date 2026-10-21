@@ -9,7 +9,8 @@ PORT=${2:-30000}
 pkill -f "sglang.launch_server" 2>/dev/null || true
 sleep 10
 
-nohup python -m sglang.launch_server \
+PY="${PYTHON:-python3}"
+nohup "$PY" -m sglang.launch_server \
   --model-path "$MODEL" \
   --context-length 98304 \
   --mem-fraction-static 0.85 \

@@ -51,7 +51,8 @@ def engine_up(url, timeout=2):
 def launch_engine(model_dir, port):
     """冷启动一个 sglang 引擎（引擎会以该模型权重起服务并等健康检查通过）。"""
     script = os.path.join(ROOT, "engine", "launch_engine.sh")
-    subprocess.run(["bash", script, model_dir, str(port)], check=True)
+    env = {**os.environ, "PYTHON": sys.executable}
+    subprocess.run(["bash", script, model_dir, str(port)], check=True, env=env)
 
 
 def run(cmd):
