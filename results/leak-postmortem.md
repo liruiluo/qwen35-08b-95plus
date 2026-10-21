@@ -13,7 +13,7 @@ something other than the task.
 
 ## Root cause
 
-`snips/data/train.jsonl` rows carry the SFT layout
+`SNIPS/data/train.jsonl` rows carry the SFT layout
 `[system, user, assistant-gold]`. The RL data loader
 (`methods/sphere_grpo.py::load_rows`, SNIPS branch) passed **all three
 turns** to `apply_chat_template(..., add_generation_prompt=True)`. The gold

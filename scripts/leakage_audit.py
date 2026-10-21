@@ -13,8 +13,8 @@ Checks, per dataset:
       synthetic pool by design — the schema space is public)
 
 Usage:
-  python leakage_audit.py --snips-train snips/data/train.jsonl \
-      --snips-val snips/data/validate.jsonl \
+  python leakage_audit.py --snips-train SNIPS/data/train.jsonl \
+      --snips-val SNIPS/data/validate.jsonl \
       --bfcl-train bfcl/data/train.jsonl --bfcl-eval questions.jsonl
 """
 import argparse, json, re

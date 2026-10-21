@@ -5,12 +5,13 @@ weights without restarting the engine. Usage:
 
   python push_ckpt.py http://127.0.0.1:30001 /path/to/ckpt
 """
+import os
 import sys
 
 import torch
 from transformers import AutoModelForCausalLM
 
-sys.path.insert(0, "/root/train95")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from methods.sphere_grpo import push_weights  # noqa: E402
 
 

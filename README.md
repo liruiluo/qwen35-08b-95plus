@@ -1,14 +1,57 @@
-# Train Qwen3.5-0.8B to 97%+ on SNIPS intent classification with RL (GRPO + SPHERE)
+# SNIPS 指令认知识别 · 交互式通讯学习算法（GRPO + SPHERE）
 
-本仓库用**纯强化学习**（GRPO + SPHERE 正则，无 SFT 初始化）把
-Qwen3.5-0.8B 在 SNIPS NLU 意图分类（7 类单选）上训练到 **97.14%**
-（BERT 监督上限 97.2% 同水平）。
-评测口径与 [LLM2LLM, ACL Findings 2024](https://arxiv.org/abs/2403.15042)
-的报数协议一致——**test 集准确率**，语料为文献标准的
-[JointBERT 划分](https://github.com/monologg/JointBERT)（Train 13,084 /
-Dev 700 / Test 700）。
+> **课题二 · 指标 2.2「交互式通讯学习算法体系」· 第三场景（指令认知识别）**
+> 对应《测试大纲》4.2.2：面向 SNIPS 数据集提出三种高效交互式学习算法
+> **SPHERE-Last-Adaptive / SPHERE-All-Adaptive / SPHERE-Last-Fixed**，
+> 基线算法 **GRPO**；测试对象共 5 个模型（训练前模型 + 基线 + 三算法）。
+> 送测包按大纲 4.2.2.4(3) 组织在 **`SNIPS/`** 子树（dataset / models /
+> logs / scripts）。
 
-现役配方（交付线）= **重置插值起点 + 纯 RL + 意图定义提示**，单次运行：
+## 结论（合格判据 B < A×5%）
+
+评测口径：7 类意图分类准确率 → 错误率（数值越小认知偏差越低），
+JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700）**test 集单发**：
+
+| 测试对象 | test 意图准确率 | 错误率 | 判据（B < A×5% = 5%） |
+|---|---|---|---|
+| 训练前模型 RandomInit（A） | 0.00% | **100%** | A = 100%（700/700 不可解析） |
+| GRPO 基线（`--rho 0`） | — | — | **待训练**（发射命令就绪，见 `SNIPS/models/GRPO-baseline/`） |
+| **SPHERE-Last-Adaptive（交付）** | **97.14%** | **2.86%** | **合格** |
+| SPHERE-All-Adaptive | 95.29% | 4.71% | 合格 |
+| SPHERE-Last-Fixed | 94.86% | 5.14% | 超线 0.14pp = 1 题（700 题二项 SE≈0.8pp，噪声带内） |
+
+高效性判据（错误率达到 5% 所需步数 N < M）待 GRPO 基线训练曲线，
+取数方法与检查点扫描见 `SNIPS/logs/README.md`。
+
+交付臂 **SPHERE-Last-Adaptive** 用**纯强化学习**（GRPO + SPHERE 谱塑性
+正则，无 SFT 初始化）达到 test **97.14%** / dev 99.14%——与 BERT 监督
+上限（97.2%，同一语料冲突地板）同水平。与 [LLM2LLM, ACL Findings
+2024](https://arxiv.org/abs/2403.15042) 的报数协议一致（test 集准确率）。
+
+## 命名映射（大纲名称 ↔ 代码名）
+
+| 大纲名称 | 训练器 `--arm` | 机制（GRPO 上叠加的 SPHERE 谱正则实例化） |
+|---|---|---|
+| SPHERE-Last-Adaptive | `last_adaptive` | 最后一个 MLP 层，自适应 α |
+| SPHERE-All-Adaptive | `all_hidden_adaptive` | 全部 24 层，逐层惩罚求和 |
+| SPHERE-Last-Fixed | `last_fixed` | 最后一个 MLP 层，固定 α=1 |
+| GRPO 基线 | 任意臂 + `--rho 0` | 关闭谱正则项（纯 GRPO） |
+
+## 送测包（SNIPS/，对齐大纲 4.2.2.4(3)）
+
+```
+SNIPS/dataset/             # 测试数据样例：train/dev/test.jsonl（sha256 与训练时逐一核对）
+SNIPS/models/              # 5 个模型目录（权重不入 git；sha256 清单+获取方式在 MANIFEST.md）
+SNIPS/logs/                # 各模型训练曲线 curves.csv（交付臂含逐步 training-log.jsonl 全量证据）
+SNIPS/scripts/evaluate.py  # 大纲指定入口：遍历测试样本 → 5 模型 → 测试集错误率
+```
+
+```bash
+python SNIPS/scripts/evaluate.py            # 全部 5 模型（自动拉起引擎、逐模型热推权重、汇总+判据标注）
+python SNIPS/scripts/evaluate.py --limit 20 # 冒烟
+```
+
+## 交付配方（SPHERE-Last-Adaptive，单次运行）
 
 - **插值起点**（`methods/rl_interp.py`）：训练前 100 步在 serve 侧给引擎
   推 α·W_reset + (1−α)·W_train（α 从 1 均匀退到 0，W_reset 为种子 17 的
@@ -16,7 +59,7 @@ Dev 700 / Test 700）。
   模型的输出不可解析 → 组内奖励全 0 → 优势全 0 → **合并梯度精确为 0**，
   W_train 在退火期逐位不变——插值是叙事/构造层（"从错误率 100% 的模型
   出发"），不改变 RL 本身的动力学；step 100 起等效于 base + 纯 RL。
-- **意图定义提示**（`snips/prepare_jointbert.py --definitions`）：系统
+- **意图定义提示**（`SNIPS/prepare_jointbert.py --definitions`）：系统
   提示携带七条意图定义，全部从**训练集统计**归纳（每条关键词有计数
   背书），在 **dev 上调参**；test 每版本**只评一次**，四个版本全部
   如实报出，交付 = v4。
@@ -45,16 +88,19 @@ Dev 700 / Test 700）。
 大种群、8 道裸片名 find/watch 双标并存、加 3 角落题），BERT 监督上限
 97.2% 撞同一地板——纯 RL 已到达监督天花板水平。
 
-第一代三臂战役（无插值、无定义、2000 步，仍作为方法证据保留）：
+## SPHERE 三臂第一代战役（方法证据）
 
-| SPHERE arm | steps | SNIPS intent accuracy (JointBERT **test** 700) |
+无插值、无定义、2000 步、各自从 base 单次训练（= 送测包
+SPHERE-All-Adaptive / SPHERE-Last-Fixed 两个模型的来源配方）：
+
+| SPHERE 臂 | steps | SNIPS intent accuracy (JointBERT **test** 700) |
 |---|---|---|
-| `last_adaptive` | 2000 | **95.14%** |
-| `all_hidden_adaptive` | 2000 | **95.29%** |
-| `last_fixed` | 2000 | 94.86% |
+| SPHERE-Last-Adaptive | 2000 | **95.14%** |
+| SPHERE-All-Adaptive | 2000 | **95.29%** |
+| SPHERE-Last-Fixed | 2000 | 94.86% |
 
 三臂各自独立地从 base 单次训练：两臂过 95% 线；第三臂
-（`last_fixed`，官方语料口径下的最强臂）落在 94.86%——距线 1 题
+（SPHERE-Last-Fixed，官方语料口径下的最强臂）落在 94.86%——距线 1 题
 （700 题二项 SE≈0.8pp，在噪声带内），按单次配方如实报出，不做任何
 补训或挑选。定义提示战役的调参纪律同上：规则只来自训练集统计与 dev
 证据，test 每版单发、四版数字全部在表。
@@ -69,11 +115,11 @@ Dev 700 / Test 700）。
 test 数）见 **`results/EVALUATION_CALIBER.md`**；训练曲线见
 `results/curves-jointbert-split.png`（官方语料附加线的曲线在
 `results/curves-official-split.png`），逐 step 数据在每个 arm 的
-`curves.csv` / `blocks.csv` 里。
+`curves.csv` / `blocks.csv` 里（送测口径的曲线在 `SNIPS/logs/`）。
 
 与 LLM2LLM 的对照：LLM2LLM（Llama-2-7B 学生模型，低数据增强场景）
 在 SNIPS 意图分类上报 92.14-93.86%（test 准确率，dev 选 checkpoint）；
-本仓库用小一个数量级的 Qwen3.5-0.8B、全量训练数据、纯 RL 达到 96.14%。
+本仓库用小一个数量级的 Qwen3.5-0.8B、全量训练数据、纯 RL 达到 97.14%。
 其仓库只开源了 GSM8K 代码、SNIPS 文件清单未随文发布，故本仓库对齐其
 **报数协议**（test 准确率）+ 社区标准划分，不做逐样本严格对齐声明；
 两者场景不同（他们主打 few-shot 数据增强，本仓库主打 RL 训练方法），
@@ -166,7 +212,7 @@ protocol-B.
 ## Training data
 
 - **SNIPS（主口径）**: JointBERT 标准划分 13,084/700/700
-  （`snips/prepare_jointbert.py` 从 monologg/JointBERT 原始文件构建，
+  （`SNIPS/prepare_jointbert.py` 从 monologg/JointBERT 原始文件构建，
   行格式与官方语料版完全一致）。选择依据：SNIPS 官方仓库
   （snipsco/nlu-benchmark，2019 年 Snips 并入 Sonos 后迁移至
   sonos/nlu-benchmark，旧地址自动重定向，本仓库脚本一律使用现行
@@ -211,21 +257,26 @@ protocol-B.
 
 ## Repository layout
 
-
 ```
+SNIPS/                      # 送测包（对齐测试大纲 4.2.2.4(3)，见上文说明）
+SNIPS/dataset/              #   测试数据样例 train/dev/test.jsonl
+SNIPS/models/               #   5 个模型目录 + MANIFEST.md（权重 sha256 与获取方式）
+SNIPS/logs/                 #   各模型训练曲线 curves.csv（交付臂含 training-log.jsonl）
+SNIPS/scripts/evaluate.py   #   大纲指定评测入口：测试样本 → 5 模型 → 错误率
 methods/sphere_grpo.py     # the RL trainer (GRPO + SPHERE, sglang rollouts,
                            #   weight push-back, per-step evidence; reward_snips_intent
-                           #   is the intent-only ablation reward)
+                           #   is the intent-only ablation reward; --rho 0 = GRPO
+                           #   baseline for the efficiency criterion)
 methods/rl_interp.py       # interpolated-start RL trainer (serve-side
                            #   alpha*W_reset + (1-alpha)*W_train for the first
                            #   --interp-steps steps, gradients only into W_train)
 methods/push_ckpt.py      # hot-swap any checkpoint into a running engine
 common/bproto.py           # shared render+generate layer (train == eval)
 common/train_sft.py        # pure-torch SFT trainer (reference only)
-snips/prepare_data.py      # snipsco/nlu-benchmark -> jsonl (official split)
-snips/prepare_jointbert.py # JointBERT 13,084/700/700 -> jsonl (primary;
+SNIPS/prepare_data.py      # snipsco/nlu-benchmark -> jsonl (official split)
+SNIPS/prepare_jointbert.py # JointBERT 13,084/700/700 -> jsonl (primary;
                            #   --definitions appends the v4 intent definitions)
-snips/eval_snips.py        # protocol-B eval: intent acc + slot micro-F1
+SNIPS/eval_snips.py        # protocol-B eval: intent acc + slot micro-F1
 bfcl/gen_train_data.py     # synthetic convention-family generator (v3:
                            #   20 families, 34.6k items, dedup-guarded
                            #   against the real eval set)
@@ -234,7 +285,8 @@ bfcl/eval_bfcl.py          # protocol-B eval + official strict scoring
 engine/launch_engine.sh    # sglang server launcher
 scripts/get_data.sh        # fetch SNIPS corpora + BFCL v4 eval data
 scripts/make_random_init.py  # seed-17 random reinit (interp counterpart)
-scripts/run_def4.sh        # the deliverable campaign (v4: data, train, eval)
+scripts/run_def4.sh        # the v4 campaign script (1000-step variant)
+scripts/run_def4s2000.sh    # the 2000-step deliverable campaign (verbatim pod-run record)
 scripts/run_snips_jointbert.sh  # first-gen three-arm campaign
 scripts/plot_curves.py     # training curves from per-step evidence
 results/EVALUATION_CALIBER.md  # evaluation caliber + evidence index
@@ -273,9 +325,9 @@ steps, single run per arm from base:
 | arm | intent accuracy | slot micro-F1 (secondary) |
 |---|---|---|
 | base zero-shot | 80.71% | 15.57% |
-| `last_adaptive` | **95.14%** | 65.61% |
-| `all_hidden_adaptive` | **95.29%** | 61.80% |
-| `last_fixed` | 94.86% | 65.33% |
+| `last_adaptive`（SPHERE-Last-Adaptive） | **95.14%** | 65.61% |
+| `all_hidden_adaptive`（SPHERE-All-Adaptive） | **95.29%** | 61.80% |
+| `last_fixed`（SPHERE-Last-Fixed） | 94.86% | 65.33% |
 
 (Dev-split diagnostic, never used for selection: 94.29 / 97.57 / 94.86.)
 
@@ -285,9 +337,9 @@ the validate split was never seen by the trainer):
 | arm | intent accuracy | slot micro-F1 |
 |---|---|---|
 | base zero-shot | 82.71% | 19.38% |
-| `last_adaptive` | 96.14% | 77.52% |
-| `all_hidden_adaptive` | 96.43% | 78.10% |
-| `last_fixed` | 97.00% | 74.05% |
+| `last_adaptive`（SPHERE-Last-Adaptive） | 96.14% | 77.52% |
+| `all_hidden_adaptive`（SPHERE-All-Adaptive） | 96.43% | 78.10% |
+| `last_fixed`（SPHERE-Last-Fixed） | 97.00% | 74.05% |
 
 Post-hoc analysis (NOT part of the deliverable, documented for
 completeness, official-caliber corpus): continuing `last_adaptive` with
@@ -312,7 +364,7 @@ JointBERT-caliber corpus two of three arms do (see the table above).
 
 ```bash
 bash scripts/get_data.sh
-cd snips
+cd SNIPS
 python prepare_jointbert.py --src ../jointbert-snips --out-dir data-jb   # primary
 python prepare_data.py --repo ../nlu-benchmark --out-dir data            # secondary
 cd ../bfcl && python gen_train_data.py --out-dir data \
@@ -333,11 +385,11 @@ python scripts/make_random_init.py /path/to/Qwen3.5-0.8B \
     /path/to/Qwen3.5-0.8B-RandomInit          # seed 17 inside
 
 # b) data with intent definitions (v4, byte-identical to the deployed prompt)
-cd snips && python prepare_jointbert.py --src ../jointbert-snips \
+cd SNIPS && python prepare_jointbert.py --src ../jointbert-snips \
     --out-dir data-jbdef --definitions && cd ..
 
 # c) train: serve-side interpolation for 100 steps, then pure RL to 2000
-python methods/rl_interp.py --data snips/data-jbdef/train.jsonl \
+python methods/rl_interp.py --data SNIPS/data-jbdef/train.jsonl \
     --base /path/to/Qwen3.5-0.8B \
     --interp-base /path/to/Qwen3.5-0.8B-RandomInit --interp-steps 100 \
     --rollout-url http://127.0.0.1:30001 --arm last_adaptive --reward snips \
@@ -350,7 +402,7 @@ python methods/rl_interp.py --data snips/data-jbdef/train.jsonl \
 
 ```bash
 python methods/sphere_grpo.py \
-    --data snips/data-jb/train.jsonl \
+    --data SNIPS/data-jb/train.jsonl \
     --base /path/to/Qwen3.5-0.8B \
     --rollout-url http://127.0.0.1:30001 \
     --arm last_adaptive --reward snips \
@@ -370,12 +422,30 @@ restore the engine to base:
 `scripts/run_snips_jointbert.sh` is the exact serial campaign that
 produced the reported numbers (per arm: restore base → train → eval).
 
+### 3c. GRPO baseline (大纲基线算法，高效性判据 M 的来源)
+
+与交付臂唯一区别 = `--rho 0`（关闭 SPHERE 谱正则项，纯 GRPO）：
+
+```bash
+python methods/rl_interp.py --data SNIPS/data-jbdef/train.jsonl \
+    --base /path/to/Qwen3.5-0.8B \
+    --interp-base /path/to/Qwen3.5-0.8B-RandomInit --interp-steps 100 \
+    --rollout-url http://127.0.0.1:30001 --arm last_adaptive --reward snips \
+    --rho 0 \
+    --out ckpt/jb-grpobase-s2000 --steps 2000 --group 16 \
+    --prompts-per-step 4 --lr 3e-6 --max-new-tokens 160 --seed 17 \
+    --save-every 200
+```
+
+（`--data` 指向带 v4 定义的数据目录 `data-jbdef`；每 200 步的中间
+检查点用于错误率-步数曲线，N<M 取数方法见 `SNIPS/logs/README.md`。）
+
 ### 4. Evaluate (protocol B, same renderer as training)
 
 ```bash
 # SNIPS: eval whatever weights the engine currently holds
-python snips/eval_snips.py --engine-url http://127.0.0.1:30001 \
-    --model /path/to/Qwen3.5-0.8B --data snips/data-jb/test.jsonl \
+python SNIPS/eval_snips.py --engine-url http://127.0.0.1:30001 \
+    --model /path/to/Qwen3.5-0.8B --data SNIPS/data-jb/test.jsonl \
     --out results/jb-snips-<arm>.jsonl
 
 # BFCL: push the trained checkpoint into the engine first, then
@@ -394,7 +464,7 @@ python bfcl/eval_bfcl.py --engine-url http://127.0.0.1:30001 \
   protocol of LLM2LLM on the literature-standard split. The slot
   span-exact micro-F1 over `(slot_name, exact-substring-value)` pairs is
   additionally reported as secondary evidence (same eval run,
-  `snips/eval_snips.py` prints both). The dev split is evaluated only as
+  `SNIPS/eval_snips.py` prints both). The dev split is evaluated only as
   a diagnostic and is never used for checkpoint selection.
 - **BFCL**: official AST checker semantics; the model answers in Qwen
   tool markup, parsed and scored strictly.
@@ -402,7 +472,7 @@ python bfcl/eval_bfcl.py --engine-url http://127.0.0.1:30001 \
 ## Data hygiene
 
 - SNIPS training rollouts come only from the corpus's own train file
-  (`snips/data-jb/train.jsonl` for the primary caliber); test and dev are
+  (`SNIPS/data-jb/train.jsonl` for the primary caliber); test and dev are
   never seen by the trainer. The two SNIPS exports overlap heavily
   (measured, `results/official-split/corpus-relation.txt`) — which is
   exactly why test-caliber numbers are trained on the JointBERT split

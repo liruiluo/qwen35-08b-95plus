@@ -34,7 +34,7 @@ Requires a running sglang engine (the same base checkpoint):
   python -m sglang.launch_server --model-path <BASE> ... --port 30001
 
 Usage (SNIPS):
-  python sphere_grpo.py --data snips/data/train.jsonl \
+  python sphere_grpo.py --data SNIPS/data/train.jsonl \
       --base /path/Qwen3.5-0.8B --rollout-url http://127.0.0.1:30001 \
       --arm last_adaptive --reward snips \
       --out ckpt/snips-last-adaptive --steps 400
@@ -362,6 +362,8 @@ def main():
     ap.add_argument("--save-every", type=int, default=0,
                     help="save a numbered checkpoint every N steps "
                          "(0 = only the final save)")
+    ap.add_argument("--rho", type=float, default=1e-3,
+                    help="SPHERE term scale; --rho 0 = pure GRPO baseline")
     args = ap.parse_args()
 
     random.seed(args.seed)
@@ -395,7 +397,7 @@ def main():
     os.makedirs(args.out, exist_ok=True)
     evidence = {"arm": args.arm, "target_layers": target_layers,
                "n_target_layers": len(target_layers), "alpha_mode": str(alpha_mode),
-               "rho": RHO, "seed": args.seed, "group": args.group,
+               "rho": args.rho, "seed": args.seed, "group": args.group,
                "prompts_per_step": args.prompts_per_step, "lr": args.lr,
                "base": args.base, "reward": args.reward,
                "train_pool": args.train_pool, "data": args.data,
@@ -548,7 +550,7 @@ def main():
         sph_loss = sum(sph_terms) if sph_terms else 0.0
 
         # ---- explicit gradient combination + single optimizer step
-        lam = RHO * gn_ppo / (gn_sphere + 1e-8) if gn_sphere > 0 else 0.0
+        lam = args.rho * gn_ppo / (gn_sphere + 1e-8) if gn_sphere > 0 else 0.0
         with torch.no_grad():
             for n, p in model.named_parameters():
                 gp, gs = g_ppo.get(n), g_sphere.get(n)

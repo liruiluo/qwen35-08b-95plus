@@ -1,0 +1,5 @@
+model=/root/models/Qwen3.5-0.8B
+n=700 wall=19.2s
+INTENT_ACC=99.14%
+SLOT_P=77.73% SLOT_R=64.77% SLOT_F1=70.66%
+TP=1162 FP=333 FN=632 unparsable=0

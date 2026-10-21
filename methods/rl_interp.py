@@ -22,7 +22,7 @@ policy's behaviour — the standard on-policy assumption is violated only
 during the anneal, by construction.
 
 Usage:
-  python rl_interp.py --data snips/data-jb/train.jsonl \
+  python rl_interp.py --data SNIPS/data-jb/train.jsonl \
       --base /root/models/Qwen3.5-0.8B \
       --interp-base /root/models/Qwen3.5-0.8B-RandomInit \
       --rollout-url http://127.0.0.1:30001 \
@@ -80,6 +80,8 @@ def main():
     ap.add_argument("--sync-every", type=int, default=1)
     ap.add_argument("--microbatch", type=int, default=16)
     ap.add_argument("--save-every", type=int, default=200)
+    ap.add_argument("--rho", type=float, default=1e-3,
+                    help="SPHERE term scale; --rho 0 = pure GRPO baseline")
     args = ap.parse_args()
 
     random.seed(args.seed)
@@ -125,7 +127,7 @@ def main():
     os.makedirs(args.out, exist_ok=True)
     evidence = {"arm": args.arm, "target_layers": target_layers,
                "n_target_layers": len(target_layers),
-               "alpha_mode": str(alpha_mode), "rho": RHO, "seed": args.seed,
+               "alpha_mode": str(alpha_mode), "rho": args.rho, "seed": args.seed,
                "group": args.group, "prompts_per_step": args.prompts_per_step,
                "lr": args.lr, "base": args.base, "reward": args.reward,
                "train_pool": args.train_pool, "data": args.data,
@@ -276,7 +278,7 @@ def main():
                            / (abs(ip_closed) + 1e-12))
         sph_loss = sum(sph_terms) if sph_terms else 0.0
 
-        lam = RHO * gn_ppo / (gn_sphere + 1e-8) if gn_sphere > 0 else 0.0
+        lam = args.rho * gn_ppo / (gn_sphere + 1e-8) if gn_sphere > 0 else 0.0
         with torch.no_grad():
             for n, p in model.named_parameters():
                 gp, gs = g_ppo.get(n), g_sphere.get(n)

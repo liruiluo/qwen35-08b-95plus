@@ -6,5 +6,12 @@ BFCL_v4_simple_python_possible_answer.json
 __pycache__/
 *.pyc
 results/**/results.jsonl
-snips/data/
+SNIPS/data/
 bfcl/data/
+# SNIPS 送测包：模型权重不入库（sha256 见 SNIPS/models/MANIFEST.md）
+SNIPS/models/**
+!SNIPS/models/**/
+!SNIPS/models/**/*.md
+!SNIPS/logs/
+SNIPS/logs/evaluate-summary.txt
+SNIPS/logs/*/eval-test.jsonl
