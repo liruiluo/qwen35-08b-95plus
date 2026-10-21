@@ -1,0 +1,12 @@
+{
+ "fam_rate": 2600,
+ "fam_canonical": 3200,
+ "fam_date": 1400,
+ "fam_strnum": 1400,
+ "fam_dict": 1600,
+ "fam_list": 1400,
+ "fam_plain": 4000,
+ "fam_optional": 900,
+ "total": 16500,
+ "dropped_vs_real": 0
+}

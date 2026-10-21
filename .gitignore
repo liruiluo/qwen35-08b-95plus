@@ -1,19 +1,14 @@
 ckpt/
 logs/
-nlu-benchmark/
 jointbert-snips/
-BFCL_v4_simple_python.json
-BFCL_v4_simple_python_possible_answer.json
 __pycache__/
 *.pyc
-results/**/results.jsonl
-SNIPS/data/
 SNIPS/data-jb*/
-bfcl/data/
-# SNIPS 送测包：模型权重不入库（sha256 见 SNIPS/models/MANIFEST.md）
+# SNIPS 交付包：模型权重不入库（sha256 见 SNIPS/models/MANIFEST.md）
 SNIPS/models/**
 !SNIPS/models/**/
 !SNIPS/models/**/*.md
 !SNIPS/logs/
 SNIPS/logs/evaluate-summary.txt
 SNIPS/logs/*/eval-test.jsonl
+engine-*.log

@@ -52,8 +52,7 @@ span-exact micro-F1 在本仓库作为附加证据线保留，不作为达标线
 | JointBERT test ∩ 官方 validate (700) | 1 / 700 | — |
 
 （重叠处意图标签 100% 一致 → 两份导出来自同一标注源，差异只在
-导出与文本规范化；近重复层面更高：JointBERT test 与官方 train 的
-token-Jaccard≥0.8 匹配为 567/700。）
+导出与文本规范化。）
 
 **推论**：若用官方 train（13,784）训练、在 JointBERT test 上报数，
 等于在 2/3 的考卷上训练过——train-on-test。因此主口径交付数字是
