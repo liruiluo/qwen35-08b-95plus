@@ -31,8 +31,8 @@ JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次�
 环境：单张 GPU；Python ≥3.10；`pip install -r requirements.txt`
 （Linux 上 torch 需为 CUDA 版，按 pytorch.org 官方指引安装）。
 
-运行前将五个模型权重放入 `SNIPS/models/` 各子目录，格式与
-sha256 清单见 `SNIPS/models/MANIFEST.md`。
+运行前将五个模型权重放入 `SNIPS/models/` 各子目录，格式见
+`SNIPS/models/MANIFEST.md`。
 
 ```bash
 python SNIPS/scripts/evaluate.py             # 遍历测试样本 → 五模型 → 错误率

@@ -4,7 +4,7 @@
 - 结果：**test 意图准确率 97.14%，错误率 2.86%（判据 B≤5% 合格）**。
 - 证据：`results/sphere-last-adaptive/`（evidence.json + 逐例 jsonl + 分数文件）；
   训练曲线见 `SNIPS/logs/SPHERE-Last-Adaptive/`。
-- 权重：本目录（HF 格式，sha256 见 MANIFEST.md）；高效性判据 N 所需的
+- 权重：本目录（HF 格式）；高效性判据 N 所需的
   每 200 步错误率-步数扫描见 `SNIPS/logs/README.md`。
 - 复现命令：仓库根 README「复现训练」一节（本模型配置
   `configs/songce/last_adaptive.yaml`）。
