@@ -9,7 +9,7 @@ GRPO 基线按《测试大纲》4.2.2 组织在 `SNIPS/` 目录，评测步骤�
 
 ## 结果
 
-SNIPS 指令认知识别任务（评价指标 = 7 类意图分类准确率），
+SNIPS 指令认知识别任务，评价指标为 7 类意图分类准确率。
 JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次评测：
 
 | 模型 | test 准确率 | 错误率 | 大纲判据（B < A×5%，即 ≤5%） |
@@ -68,7 +68,7 @@ python scripts/make_random_init.py <base模型> <随机初始化目录>
 # 3) 启动推理引擎
 bash engine/launch_engine.sh <base模型> 30001
 
-# 4) 训练（每车一个 hydra 配置，见 configs/songce/）
+# 4) 训练（每个算法一个 hydra 配置，见 configs/songce/）
 python methods/train_hydra.py -cn last_adaptive   # SPHERE-Last-Adaptive（交付）
 python methods/train_hydra.py -cn all_adaptive    # SPHERE-All-Adaptive
 python methods/train_hydra.py -cn last_fixed      # SPHERE-Last-Fixed
@@ -84,18 +84,20 @@ python methods/train_hydra.py -cn grpo_baseline   # GRPO 基线
 训练算法为 **GRPO**（组相对策略优化）：对每个提示采样 16 条输出，以
 组内相对优势替代价值网络估计。在此之上叠加 **SPHERE 谱塑性正则**
 （arXiv:2605.04712）：对 Transformer MLP 层输入的 Gram 矩阵施加
-Parseval 型正则，强度固定为 GRPO 梯度的 0.1%（rho=1e-3）。三种实例化
-构成三个算法：仅最后一层、自适应 α（Last-Adaptive），全部层
-（All-Adaptive），仅最后一层、固定 α=1（Last-Fixed）；GRPO 基线即
-关闭该正则项（rho=0）。
+Parseval 型正则，强度固定为 GRPO 梯度的 0.1%（rho=1e-3）。
+
+四个训练配置：
+
+- SPHERE-Last-Adaptive：仅最后一层，自适应 α
+- SPHERE-All-Adaptive：全部层
+- SPHERE-Last-Fixed：仅最后一层，固定 α=1
+- GRPO 基线：关闭谱正则项（rho=0）
 
 训练设计：系统提示含七条**意图定义**，全部由训练集统计归纳，
 调参只用开发集，test 集仅用于最终评测。
 
-评测协议：训练与评测使用同一渲染层（本地渲染 chat template，token
-id 直送引擎），评测采用 JointBERT 标准划分（SNIPS 官方 train
-与标准 test 集重叠 464/700，不能混用；完整论证见
-`results/EVALUATION_CALIBER.md`）。
+评测采用 JointBERT 标准划分；划分依据与评测口径见
+`results/EVALUATION_CALIBER.md`。
 
 ## 数据与引用
 
