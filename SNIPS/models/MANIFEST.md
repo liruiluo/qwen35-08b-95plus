@@ -10,12 +10,12 @@
 
 ## 命名映射（大纲名称 ↔ 代码名）
 
-| 大纲名称 | 训练器 `--arm` | 机制 |
-|---|---|---|
-| SPHERE-Last-Adaptive | `last_adaptive` | 最后一个 MLP 层、自适应 α |
-| SPHERE-All-Adaptive | `all_hidden_adaptive` | 全部 24 层、逐层求和 |
-| SPHERE-Last-Fixed | `last_fixed` | 最后一个 MLP 层、固定 α=1 |
-| GRPO 基线 | （`--arm` 任意 + `--rho 0`） | 关闭 SPHERE 谱正则项，纯 GRPO |
+| 大纲名称 | 训练器 `--arm` |
+|---|---|
+| SPHERE-Last-Adaptive | `last_adaptive` |
+| SPHERE-All-Adaptive | `all_hidden_adaptive` |
+| SPHERE-Last-Fixed | `last_fixed` |
+| GRPO 基线 | （`--arm` 任意 + `--rho 0`） |
 
 ## 权重获取
 
