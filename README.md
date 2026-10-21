@@ -24,15 +24,26 @@ JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次�
 
 ## 评测
 
-`SNIPS/` 按测试大纲 4.2.2.4(3) 组织：`SNIPS/dataset/` 测试数据、
-`SNIPS/models/` 五个模型目录与权重清单
-（`SNIPS/models/MANIFEST.md`）、`SNIPS/logs/` 各模型训练曲线、
-`SNIPS/scripts/evaluate.py` 评测入口。
+`SNIPS/` 按测试大纲 4.2.2.4(3) 组织：
+
+- `SNIPS/dataset/`：测试数据
+- `SNIPS/models/`：五个模型目录
+- `SNIPS/logs/`：各模型训练曲线
+- `SNIPS/scripts/evaluate.py`：评测入口
 
 环境：单张 GPU；Python ≥3.10；`pip install -r requirements.txt`
-（Linux 上 torch 需安装 CUDA 版本，请按 pytorch.org 官方索引安装）。
-运行前将五个模型权重放入 `SNIPS/models/` 各子目录（HF 格式，
-sha256 清单见 `SNIPS/models/MANIFEST.md`）。
+（Linux 上 torch 需为 CUDA 版，按 pytorch.org 官方指引安装）。
+
+运行前将五个模型权重放入 `SNIPS/models/` 各子目录，格式与
+sha256 清单见 `SNIPS/models/MANIFEST.md`。
+
+```bash
+python SNIPS/scripts/evaluate.py             # 遍历测试样本 → 五模型 → 错误率
+python SNIPS/scripts/evaluate.py --limit 20  # 冒烟
+```
+
+脚本自动拉起推理引擎、逐模型加载权重，输出各模型错误率与判据标注
+（训练前模型预期 100%，项目算法模型 ≤5% 为合格）。
 
 ```bash
 python SNIPS/scripts/evaluate.py             # 遍历测试样本 → 五模型 → 错误率
