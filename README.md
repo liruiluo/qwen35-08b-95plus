@@ -92,9 +92,6 @@ Parseval 型正则，强度固定为 GRPO 梯度的 0.1%（rho=1e-3）。
 - SPHERE-Last-Fixed：仅最后一层，固定 α=1
 - GRPO 基线：关闭谱正则项（rho=0）
 
-训练设计：系统提示含七条**意图定义**，全部由训练集统计归纳，
-调参只用开发集，test 集仅用于最终评测。
-
 评测采用 JointBERT 标准划分；划分依据与评测口径见
 `results/EVALUATION_CALIBER.md`。
 
