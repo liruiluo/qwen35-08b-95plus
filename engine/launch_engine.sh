@@ -15,6 +15,8 @@ nohup "$PY" -m sglang.launch_server \
   --context-length 98304 \
   --mem-fraction-static 0.85 \
   --reasoning-parser qwen3 \
+  --attention-backend triton \
+  --sampling-backend pytorch \
   --cuda-graph-max-bs-decode 32 \
   --host 127.0.0.1 --port "$PORT" \
   > "engine-$PORT.log" 2>&1 &
