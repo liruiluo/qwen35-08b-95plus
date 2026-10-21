@@ -17,7 +17,7 @@ JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次�
 | SPHERE-Last-Fixed | 统一配方训练中† | | |
 | GRPO 基线 | 训练中† | | |
 
-† 与交付模型完全相同的配方，完成后更新此表。
+† 训练进行中，完成后更新此表。
 
 ## 评测
 
@@ -33,14 +33,6 @@ JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次�
 
 运行前将五个模型权重放入 `SNIPS/models/` 各子目录，格式与
 sha256 清单见 `SNIPS/models/MANIFEST.md`。
-
-```bash
-python SNIPS/scripts/evaluate.py             # 遍历测试样本 → 五模型 → 错误率
-python SNIPS/scripts/evaluate.py --limit 20  # 冒烟
-```
-
-脚本自动拉起推理引擎、逐模型加载权重，输出各模型错误率与判据标注
-（训练前模型预期 100%，项目算法模型 ≤5% 为合格）。
 
 ```bash
 python SNIPS/scripts/evaluate.py             # 遍历测试样本 → 五模型 → 错误率

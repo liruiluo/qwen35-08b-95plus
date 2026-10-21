@@ -15,7 +15,7 @@ For every corpus with evidence, this script writes:
     results/curves-<corpus>.png         one panel per arm: raw reward (thin),
                                          50-step rolling mean (thick), final
                                          intent accuracy annotated when the
-                                         arm's eval-score.txt is present.
+                                         arm's test-score file is present.
 
 Usage:  python scripts/plot_curves.py [--results-dir results]
 """
@@ -28,11 +28,13 @@ def load_arm(arm_dir):
     steps = [r["step"] for r in ev["lambda_stats"]]
     rew = [r["mean_reward"] for r in ev["lambda_stats"]]
     acc = None
-    score = os.path.join(arm_dir, "eval-score.txt")
-    if os.path.exists(score):
-        for line in open(score):
-            if line.startswith("INTENT_ACC="):
-                acc = line.strip().split("=")[1]
+    for fname in ("eval-test-score.txt", "eval-score.txt"):
+        score = os.path.join(arm_dir, fname)
+        if os.path.exists(score):
+            for line in open(score):
+                if line.startswith("INTENT_ACC="):
+                    acc = line.strip().split("=")[1]
+            break
     return ev.get("arm", os.path.basename(arm_dir)), ev.get("steps", len(steps)), steps, rew, acc
 
 

@@ -19,7 +19,8 @@ a slot value is the space-joined token span (an exact substring of the
 whitespace-normalized utterance).
 
 Usage:
-  python prepare_jointbert.py --src ../jointbert-snips --out-dir data-jb
+  python prepare_jointbert.py --src ../jointbert-snips \
+      --out-dir data-jbdef4 --definitions
 """
 import argparse, json, os
 

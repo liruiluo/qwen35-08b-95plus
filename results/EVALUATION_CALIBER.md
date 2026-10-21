@@ -2,7 +2,7 @@
 
 本文件记录交付数字的评测口径（在哪个划分上、按什么协议报数）、
 口径选择的依据、以及支持复现的全部证据文件索引。
-最后更新：2026-10-19（JointBERT test 口径重训后）。
+最后更新：2026-10-20（JointBERT test 口径重训后；补全证据索引）。
 
 ## 1. 任务范围
 
@@ -70,10 +70,12 @@ token-Jaccard≥0.8 匹配为 567/700。）
   prompts-per-step 4、lr 3e-6、max-new-tokens 160、save-every 200，
   其余取默认值：name-credit 0.25、gen-temp 1.0、microbatch 16）；
 - 无续训/补训，无按中间成绩的任何修补，无按中间评测挑 checkpoint；
-- 评测与训练同渲染协议（protocol B，见 README）。
+- 评测与训练同渲染协议（同一 chat 模板与生成参数，由
+  common/bproto.py 统一实现）。
 
 完整命令见 README「复现训练」一节；
-`scripts/run_snips_jointbert.sh` 是三个算法模型串行训练的原始脚本。
+`scripts/run_songce_*.sh` 是三个算法模型串行训练的原始脚本
+（训练服务器布局）。
 
 ## 5. 证据文件索引
 
@@ -82,6 +84,8 @@ results/
   EVALUATION_CALIBER.md            ← 本文件（口径）
   sphere-last-adaptive/            ← 交付模型（97.14%）单次运行证据
     （evidence.json + final-{dev,test}.jsonl 逐例 + 分数文件）
+  randominit/                      ← 训练前模型（A）test 证据
+    （final-test.jsonl 逐例 + 分数文件）
   jointbert-split/                 ← 主口径（test 报数）证据
     <arm>/evidence.json           运行配置 + 每 step 记录（g_ppo、
                                    g_sphere、lambda、mean_reward、
@@ -98,6 +102,8 @@ results/
   official-split/                  ← 附加证据线（官方 validate 口径）
     （各算法同构证据 + base 零样本 + 语料关系取证）
   curves-official-split.png
+  leakage-audit.md                 ← 官方划分数据卫生审计记录
+  leak-postmortem.md               ← 早期 gold 泄漏事后分析
 ```
 
 ## 6. 与 LLM2LLM 数字的关系（如何对照、如何不对照）
