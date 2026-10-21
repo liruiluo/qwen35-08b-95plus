@@ -1,0 +1,5 @@
+model=RandomInit
+n=700 wall=144.3s
+INTENT_ACC=0.00%
+SLOT_P=0.00% SLOT_R=0.00% SLOT_F1=0.00%
+TP=0 FP=0 FN=1790 unparsable=700

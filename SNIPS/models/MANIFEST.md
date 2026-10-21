@@ -38,4 +38,4 @@ sha256sum SNIPS/models/<模型名>/model.safetensors   # macOS: shasum -a 256 <�
 | GRPO-baseline | （待训练，见 `GRPO-baseline/README.md`） | — |
 
 RandomInit 由 `scripts/make_random_init.py`（seed 17）从
-Qwen3.5-0.8B-instruct 随机重置生成，可离线复现。
+Qwen3.5-0.8B 随机重置生成，可离线复现。
