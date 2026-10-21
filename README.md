@@ -24,8 +24,8 @@ JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次�
 
 ## 评测
 
-`SNIPS/` 按测试大纲 4.2.2.4(3) 组织：`SNIPS/dataset/` 测试数据（含
-sha256 校验）、`SNIPS/models/` 五个模型目录与权重清单
+`SNIPS/` 按测试大纲 4.2.2.4(3) 组织：`SNIPS/dataset/` 测试数据、
+`SNIPS/models/` 五个模型目录与权重清单
 （`SNIPS/models/MANIFEST.md`）、`SNIPS/logs/` 各模型训练曲线、
 `SNIPS/scripts/evaluate.py` 评测入口。
 
