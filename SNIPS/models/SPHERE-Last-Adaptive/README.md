@@ -8,4 +8,5 @@
   训练曲线见 `SNIPS/logs/SPHERE-Last-Adaptive/`。
 - 权重：pod `ckpt/jb-interpdef4s2000-last_adaptive`（sha256 见 MANIFEST.md，
   含每 200 步中间检查点，供高效性判据 N 的错误率-步数扫描）。
-- 精确复现命令：仓库根 README「Reproduction → 3. Train the deliverable」。
+- 精确复现命令：仓库根 README「复现训练」一节（hydra 配置见
+  `configs/songce/`，交付臂等价直接命令在 `scripts/run_def4s2000.sh`）。

@@ -71,7 +71,7 @@ token-Jaccard≥0.8 匹配为 567/700。）
 - 无续训/补训，无按中间成绩的任何修补，无按中间评测挑 checkpoint；
 - 评测与训练同渲染协议（protocol B，见 README）。
 
-完整命令见 README "Reproduction" 一节；
+完整命令见 README「复现训练」一节；
 `scripts/run_snips_jointbert.sh` 是三臂串行的原始 campaign 脚本。
 
 ## 5. 证据文件索引
