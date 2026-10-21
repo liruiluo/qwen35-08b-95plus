@@ -73,8 +73,10 @@ python methods/train_hydra.py -cn grpo_baseline   # GRPO 基线
 ```
 
 统一训练超参：group 16、lr 3e-6（基线 1.5e-6）、seed 17、2000 步、
-每 200 步保存检查点。`configs/songce/base.yaml` 中的模型与数据路径
-为训练服务器路径，本机复现时按环境修改。
+每 200 步保存检查点。
+
+`configs/songce/base.yaml` 中的模型与数据路径为训练服务器路径，
+本机复现时按环境修改。
 
 ## 方法
 
