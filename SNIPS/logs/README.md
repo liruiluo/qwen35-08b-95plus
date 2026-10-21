@@ -14,7 +14,7 @@
 ## 高效性判据（N<M）的取数方法
 
 大纲 4.2.2.4(3) 第 4 步要求"错误率达到 5% 所需训练迭代次数"的对比。
-取数方法：各臂训练均每 200 步存检查点（pod `ckpt/*/step{200..2000}`，
+取数方法：各模型训练均每 200 步存检查点（各模型目录的 `step{200..2000}`，
 GRPO 基线发射命令见 `SNIPS/models/GRPO-baseline/README.md`），用
 `methods/push_ckpt.py` + `SNIPS/eval_snips.py` 对每个检查点跑一次
 test 集评测，得到错误率-步数曲线；N = SPHERE 各臂首次 ≤5% 的步数，

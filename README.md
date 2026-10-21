@@ -50,9 +50,10 @@ cd SNIPS && python prepare_jointbert.py --src ../jointbert-snips \
 bash engine/launch_engine.sh <base模型> 30001
 
 # 3) 训练（每车一个 hydra 配置，见 configs/songce/）
-python methods/train_hydra.py -cn all_adaptive     # SPHERE-All-Adaptive
-python methods/train_hydra.py -cn last_fixed       # SPHERE-Last-Fixed
-python methods/train_hydra.py -cn grpo_baseline    # GRPO 基线
+python methods/train_hydra.py -cn last_adaptive   # SPHERE-Last-Adaptive（交付臂）
+python methods/train_hydra.py -cn all_adaptive    # SPHERE-All-Adaptive
+python methods/train_hydra.py -cn last_fixed      # SPHERE-Last-Fixed
+python methods/train_hydra.py -cn grpo_baseline   # GRPO 基线
 ```
 
 统一训练超参：group 16、lr 3e-6（基线 1.5e-6）、seed 17、2000 步、
@@ -69,10 +70,10 @@ Parseval 型正则，强度固定为 GRPO 梯度的 0.1%（rho=1e-3）。三种�
 关闭该正则项（rho=0）。
 
 训练设计：系统提示含七条**意图定义**，全部由训练集统计归纳，
-在开发集上调参；test 集每个版本只评测一次。
+调参只用开发集，test 集仅用于最终评测。
 
 评测协议：训练与评测使用同一渲染层（本地渲染 chat template，token
-id 直送引擎），评测口径采用 JointBERT 标准划分（SNIPS 官方 train
+id 直送引擎），评测采用 JointBERT 标准划分（SNIPS 官方 train
 与标准 test 集重叠 464/700，不能混用；完整论证见
 `results/EVALUATION_CALIBER.md`）。
 
