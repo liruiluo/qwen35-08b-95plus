@@ -96,7 +96,7 @@ def main():
         print(f"\n=== {name} ===")
         run([sys.executable, os.path.join(ROOT, "methods", "push_ckpt.py"),
              args.engine_url, mdir])
-        cmd = [sys.executable, os.path.join(ROOT, "snips", "eval_snips.py"),
+        cmd = [sys.executable, os.path.join(ROOT, "SNIPS", "eval_snips.py"),
                "--engine-url", args.engine_url, "--model", mdir,
                "--data", DATASET, "--out", out]
         if args.limit:
