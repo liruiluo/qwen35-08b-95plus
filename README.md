@@ -48,15 +48,15 @@ bash scripts/get_data.sh
 cd SNIPS && python prepare_jointbert.py --src ../jointbert-snips \
     --out-dir data-jbdef --definitions && cd ..
 
-# 2) 模型：下载 Qwen3.5-0.8B 作为 <base模型>，
-#    并生成训练前模型（随机初始化，seed 17）
+# 2) 模型：从 ModelScope 或 HuggingFace 下载 Qwen3.5-0.8B 作为
+#    <base模型>，并生成训练前模型（随机初始化，seed 17）
 python scripts/make_random_init.py <base模型> <随机初始化目录>
 
 # 3) 启动推理引擎
 bash engine/launch_engine.sh <base模型> 30001
 
-# 3) 训练（每车一个 hydra 配置，见 configs/songce/）
-python methods/train_hydra.py -cn last_adaptive   # SPHERE-Last-Adaptive（交付臂）
+# 4) 训练（每车一个 hydra 配置，见 configs/songce/）
+python methods/train_hydra.py -cn last_adaptive   # SPHERE-Last-Adaptive（交付）
 python methods/train_hydra.py -cn all_adaptive    # SPHERE-All-Adaptive
 python methods/train_hydra.py -cn last_fixed      # SPHERE-Last-Fixed
 python methods/train_hydra.py -cn grpo_baseline   # GRPO 基线

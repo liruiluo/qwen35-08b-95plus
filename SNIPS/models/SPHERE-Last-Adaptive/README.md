@@ -1,4 +1,4 @@
-# SPHERE-Last-Adaptive（交付臂）
+# SPHERE-Last-Adaptive（交付）
 
 - 训练配方：纯 RL（GRPO + SPHERE 谱塑性正则）+ 意图定义提示 +
   2000 步（group 16、lr 3e-6、seed 17）。
@@ -7,5 +7,5 @@
   训练曲线见 `SNIPS/logs/SPHERE-Last-Adaptive/`。
 - 权重：训练服务器 `ckpt/jb-interpdef4s2000-last_adaptive`（sha256 见 MANIFEST.md，
   含每 200 步中间检查点，供高效性判据 N 的错误率-步数扫描）。
-- 复现命令：仓库根 README「复现训练」一节（本臂配置
+- 复现命令：仓库根 README「复现训练」一节（本模型配置
   `configs/songce/last_adaptive.yaml`）。

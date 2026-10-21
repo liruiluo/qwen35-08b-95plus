@@ -13,4 +13,3 @@ SPHERE 谱正则项（纯 GRPO）与基线学习率；数据、步数、种子�
 ```bash
 python methods/train_hydra.py -cn grpo_baseline   # 渲染为训练器的精确 argv 并执行
 ```
-基线与交付模型的差异仅两个字段：`rho: 0.0`（关闭谱正则）、`lr: 1.5e-6`（基线学习率）。

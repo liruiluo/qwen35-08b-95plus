@@ -24,7 +24,7 @@
 顶层文件，`step*/` 中间检查点不必拷贝）：
 
 ```bash
-shasum -a 256 SNIPS/models/<模型名>/model.safetensors
+sha256sum SNIPS/models/<模型名>/model.safetensors   # macOS: shasum -a 256 <同路径>
 ```
 
 ## sha256 清单（训练服务器实测，2026-10-21）

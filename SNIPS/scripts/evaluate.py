@@ -87,7 +87,7 @@ def main():
         launch_engine(os.path.join(MODELS_DIR, ready[0]), args.port)
         assert engine_up(args.engine_url), "engine failed to become healthy"
 
-    # 3) 逐模型：热推权重 → 遍历测试样本 → 解析错误率
+    # 3) 逐模型：加载权重 → 遍历测试样本 → 解析错误率
     rows = []
     for name in ready:
         mdir = os.path.join(MODELS_DIR, name)
