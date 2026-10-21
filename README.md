@@ -28,7 +28,8 @@ sha256 校验）、`SNIPS/models/` 五个模型目录与权重清单
 （`SNIPS/models/MANIFEST.md`）、`SNIPS/logs/` 各模型训练曲线、
 `SNIPS/scripts/evaluate.py` 评测入口。
 
-环境：单张 GPU；Python ≥3.10；`pip install -r requirements.txt`。
+环境：单张 GPU；Python ≥3.10；`pip install -r requirements.txt`
+（Linux 上 torch 需安装 CUDA 版本，请按 pytorch.org 官方索引安装）。
 运行前将五个模型权重放入 `SNIPS/models/` 各子目录（HF 格式，
 sha256 清单见 `SNIPS/models/MANIFEST.md`）。
 
