@@ -10,9 +10,9 @@ Source: monologg/JointBERT repo, data/snips/{train,dev,test}/{seq.in,seq.out,lab
         test-caliber numbers must be trained on THIS split.
 
 Input:  <src>/{train,dev,test}-{seq.in,seq.out,label}
-Output: <out-dir>/{train,dev,test}.jsonl + schema.json in the same
-        {"messages": [...]} row schema as prepare_data.py, so the trainer
-        and eval_snips.py consume both corpora unchanged.
+Output: <out-dir>/{train,dev,test}.jsonl + schema.json in the
+        {"messages": [...]} row schema, so the trainer and
+        eval_snips.py consume it unchanged.
 
 Slots are reconstructed from the BIO tags aligned to the whitespace tokens;
 a slot value is the space-joined token span (an exact substring of the
@@ -47,7 +47,7 @@ def bio_to_slots(tokens, tags):
 
 
 def read_split(src, split, system):
-    """One row per line: same schema as prepare_data.py output."""
+    """One row per line: {"messages": [...]} schema."""
     utts = read_lines(os.path.join(src, f"{split}-seq.in"))
     tags = read_lines(os.path.join(src, f"{split}-seq.out"))
     labels = read_lines(os.path.join(src, f"{split}-label"))

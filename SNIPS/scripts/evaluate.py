@@ -13,8 +13,8 @@
 前置条件：
   - SNIPS/models/<名称>/ 下已放置模型权重（见 SNIPS/models/MANIFEST.md
     的 sha256 与获取方式；未放置的模型会被跳过并标注 PENDING）；
-  - GPU 环境装有 torch / transformers / sglang（见仓库根 README 的
-    Environment 一节）。引擎未启动时本脚本会自动拉起。
+  - GPU 环境装有 torch / transformers / sglang（安装见仓库根 README
+    「评测」一节与 requirements.txt）。引擎未启动时本脚本会自动拉起。
 
 判定（测试大纲 4.2.2.5）：
   A = 训练前模型的错误率（预期 100%）；B = 各算法训练后模型的错误率。
