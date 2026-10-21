@@ -1,4 +1,4 @@
-model=/root/models/Qwen3.5-0.8B
+model=Qwen3.5-0.8B (base)
 n=700 wall=21.3s
 INTENT_ACC=80.71%
 SLOT_P=18.78% SLOT_R=13.30% SLOT_F1=15.57%

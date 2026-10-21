@@ -47,7 +47,7 @@ python SNIPS/scripts/evaluate.py --limit 20  # 冒烟
 # 1) 数据：JointBERT 原始文件 -> jsonl（--definitions 附带意图定义提示）
 bash scripts/get_data.sh
 cd SNIPS && python prepare_jointbert.py --src ../jointbert-snips \
-    --out-dir data-jbdef --definitions && cd ..
+    --out-dir data-jbdef4 --definitions && cd ..
 
 # 2) 模型：从 ModelScope 或 HuggingFace 下载 Qwen3.5-0.8B 作为
 #    <base模型>，并生成训练前模型（随机初始化，seed 17）

@@ -79,6 +79,8 @@ token-Jaccard≥0.8 匹配为 567/700。）
 ```
 results/
   EVALUATION_CALIBER.md            ← 本文件（口径）
+  sphere-last-adaptive/            ← 交付模型（97.14%）单次运行证据
+    （evidence.json + final-{dev,test}.jsonl 逐例 + 分数文件）
   jointbert-split/                 ← 主口径（test 报数）证据
     <arm>/evidence.json           运行配置 + 每 step 记录（g_ppo、
                                    g_sphere、lambda、mean_reward、

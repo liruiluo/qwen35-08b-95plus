@@ -11,6 +11,8 @@
 # Only a run that completes all steps uninterrupted becomes the reported
 # artifact. Up to 3 attempts per arm.
 # Usage: bash run_snips_jointbert.sh [steps]
+# 注：本脚本是训练服务器上的原始 campaign 记录（内容原样保留）；
+# 其中路径与进程管理均为该服务器布局。本机复现请按 README「复现训练」。
 set -u
 cd /root/train95
 PY=/root/h3venv/bin/python

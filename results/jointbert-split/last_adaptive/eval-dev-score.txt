@@ -1,4 +1,4 @@
-model=/root/models/Qwen3.5-0.8B
+model=SPHERE-Last-Adaptive
 n=700 wall=14.9s
 INTENT_ACC=94.29%
 SLOT_P=68.51% SLOT_R=60.87% SLOT_F1=64.46%

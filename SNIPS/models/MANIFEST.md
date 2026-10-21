@@ -2,9 +2,9 @@
 
 | 目录 | 大纲角色 | 状态 | test 错误率（实测） |
 |---|---|---|---|
-| `RandomInit/` | 训练前模型（判据 A） | ✅ 权重在训练服务器 | **100%**（700/700 不可解析，意图准确率 0.00%） |
+| `RandomInit/` | 训练前模型（判据 A） | ✅ 权重随材料交付 | **100%**（700/700 不可解析，意图准确率 0.00%） |
 | `GRPO-baseline/` | 基线算法模型（GRPO，rho=0） | ⏳ **待训练** | — |
-| `SPHERE-Last-Adaptive/` | 项目算法 1（交付） | ✅ 权重在训练服务器 | **2.86%**（意图准确率 97.14%） |
+| `SPHERE-Last-Adaptive/` | 项目算法 1（交付） | ✅ 权重随材料交付 | **2.86%**（意图准确率 97.14%） |
 | `SPHERE-All-Adaptive/` | 项目算法 2 | 统一配方重训中† | — |
 | `SPHERE-Last-Fixed/` | 项目算法 3 | 统一配方重训中† | — |
 
@@ -27,12 +27,12 @@
 sha256sum SNIPS/models/<模型名>/model.safetensors   # macOS: shasum -a 256 <同路径>
 ```
 
-## sha256 清单（训练服务器实测，2026-10-21）
+## sha256 清单（2026-10-21 实测）
 
-| 模型 | 训练服务器路径 | model.safetensors sha256 |
-|---|---|---|
-| RandomInit | `/root/models/Qwen3.5-0.8B-RandomInit` | `aa430a35da2d2855f8059cb45a7f28c2753f94ccb6ff363ea053e76922b31130` |
-| SPHERE-Last-Adaptive | `/root/train95/ckpt/jb-interpdef4s2000-last_adaptive` | `d24f3ff584704c8f5ba8042163eb69efdf92cdff76b0be2157bb621357e3c006` |
+| 模型 | model.safetensors sha256 |
+|---|---|
+| RandomInit | `aa430a35da2d2855f8059cb45a7f28c2753f94ccb6ff363ea053e76922b31130` |
+| SPHERE-Last-Adaptive | `d24f3ff584704c8f5ba8042163eb69efdf92cdff76b0be2157bb621357e3c006` |
 | SPHERE-All-Adaptive | （重训完成后更新） | — |
 | SPHERE-Last-Fixed | （重训完成后更新） | — |
 | GRPO-baseline | （待训练，见 `GRPO-baseline/README.md`） | — |
