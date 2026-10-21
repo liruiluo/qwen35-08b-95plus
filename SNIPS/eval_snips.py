@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Evaluate a chat model on SNIPS NLU (validate split): intent accuracy +
-span-exact slot micro-F1.
+"""Evaluate a chat model on SNIPS NLU: intent accuracy + span-exact
+slot micro-F1.
 
-Protocol B (identical to the training rollout): the chat template is rendered
-locally with the model tokenizer (thinking disabled) and sent to the sglang
-engine's /generate endpoint as token ids. See common/bproto.py for why.
+The chat template is rendered locally with the model tokenizer (thinking
+disabled) and sent to the sglang engine's /generate endpoint as token
+ids — identical to the training rollout (see common/bproto.py).
 
 Usage:
   python eval_snips.py --engine-url http://127.0.0.1:30001 \

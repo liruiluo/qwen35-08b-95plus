@@ -1,25 +1,13 @@
-"""Shared B-protocol generation layer (train == eval, one source of truth).
+"""Generation helpers: render the chat template locally and call the
+sglang engine's /generate endpoint with token ids.
 
-Protocol B = the model is prompted through the SAME path both at training
-rollout and at evaluation:
-
-  1. the chat template is rendered LOCALLY with the model's own tokenizer
-     (enable_thinking=False, add_generation_prompt=True, optional tools);
-  2. the resulting token ids are sent to the sglang engine's /generate
-     endpoint (`input_ids`, not `text`).
-
-Why this matters (measured 2026-10-18, SNIPS validate n=700):
-  - base Qwen3.5-0.8B:      A 82.71 intent / 19.61 slot-F1
-                            B 82.71 intent / 19.38 slot-F1   (no difference)
-  - SNIPS-supervised ckpt:  A  0.00 /  0.00 (700/700 unparsable)
-                            B 98.86 / 96.68
-A model whose behaviour was shaped under the local rendering COLLAPSES when
-served through /v1/chat/completions (the server re-renders the prompt), so
-any checkpoint produced by this repo MUST be evaluated under B. The base
-model is protocol-insensitive; trained checkpoints are not. All numbers in
-this repo are therefore B-protocol numbers, and this module is the single
-implementation both evaluation scripts and the trainer's rollout path build
-on.
+The chat template is rendered locally with the model's own tokenizer
+(enable_thinking=False, add_generation_prompt=True, optional tools) and the
+resulting token ids are sent as `input_ids` (not `text`). Training rollouts
+and evaluation must use the SAME rendering: a checkpoint trained under this
+local rendering breaks when the prompt is re-rendered server-side (e.g. via
+/v1/chat/completions). SNIPS/eval_snips.py uses these functions;
+methods/sphere_grpo.py renders prompts with identical parameters.
 """
 import json
 import time
