@@ -270,6 +270,8 @@ methods/sphere_grpo.py     # the RL trainer (GRPO + SPHERE, sglang rollouts,
 methods/rl_interp.py       # interpolated-start RL trainer (serve-side
                            #   alpha*W_reset + (1-alpha)*W_train for the first
                            #   --interp-steps steps, gradients only into W_train)
+methods/train_hydra.py     # hydra render layer: configs/songce/*.yaml ->
+                           #   the exact rl_interp argv (trainer untouched)
 methods/push_ckpt.py      # hot-swap any checkpoint into a running engine
 common/bproto.py           # shared render+generate layer (train == eval)
 common/train_sft.py        # pure-torch SFT trainer (reference only)
@@ -287,8 +289,12 @@ scripts/get_data.sh        # fetch SNIPS corpora + BFCL v4 eval data
 scripts/make_random_init.py  # seed-17 random reinit (interp counterpart)
 scripts/run_def4.sh        # the v4 campaign script (1000-step variant)
 scripts/run_def4s2000.sh    # the 2000-step deliverable campaign (verbatim pod-run record)
+scripts/run_songce_*.sh     # per-car campaign scripts (All-Adaptive / Last-Fixed /
+                           #   GRPO baseline + sequencer), configs in configs/songce/
 scripts/run_snips_jointbert.sh  # first-gen three-arm campaign
 scripts/plot_curves.py     # training curves from per-step evidence
+configs/songce/            # hydra per-car configs (base = 交付配方 shared fields;
+                           #   arms differ only in arm/rho/lr)
 results/EVALUATION_CALIBER.md  # evaluation caliber + evidence index
 results/jb-interpdef4s2000/ # deliverable evidence (scores + evidence.json)
 results/jb-interpdef4/     # 1000-step variant evidence
@@ -439,6 +445,11 @@ python methods/rl_interp.py --data SNIPS/data-jbdef/train.jsonl \
 
 （`--data` 指向带 v4 定义的数据目录 `data-jbdef`；每 200 步的中间
 检查点用于错误率-步数曲线，N<M 取数方法见 `SNIPS/logs/README.md`。）
+
+pod 侧的三车（两臂重训 + GRPO 基线）统一走 hydra 配置：
+`python methods/train_hydra.py -cn all_adaptive|last_fixed|grpo_baseline`
+渲染为与上文逐字段相同的 argv（`run=false` 只打印不执行）；
+逐车脚本 `scripts/run_songce_*.sh`，配置唯一来源 `configs/songce/`。
 
 ### 4. Evaluate (protocol B, same renderer as training)
 
