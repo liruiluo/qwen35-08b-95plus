@@ -4,10 +4,13 @@ jointbert-snips/
 __pycache__/
 *.pyc
 SNIPS/data-jb*/
-# SNIPS 交付包：模型权重不入库（sha256 见 SNIPS/models/MANIFEST.md）
+# SNIPS 交付包：模型权重不入库（清单见 SNIPS/models/MANIFEST.md）
 SNIPS/models/**
 !SNIPS/models/**/
 !SNIPS/models/**/*.md
+# 基座权重不入库（说明见 base/README.md）
+base/*
+!base/README.md
 !SNIPS/logs/
 SNIPS/logs/evaluate-summary.txt
 SNIPS/logs/*/eval-test.jsonl

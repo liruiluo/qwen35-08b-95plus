@@ -50,9 +50,9 @@ bash scripts/get_data.sh
 cd SNIPS && python prepare_jointbert.py --src ../jointbert-snips \
     --out-dir data-jbdef4 --definitions && cd ..
 
-# 2) 模型：从 ModelScope 或 HuggingFace 下载 Qwen3.5-0.8B 作为
-#    <base模型>，并生成训练前模型（随机初始化，seed 17）
-python scripts/make_random_init.py <base模型> <随机初始化目录>
+# 2) 模型：基座权重 Qwen3.5-0.8B 放入 base/，并生成训练前模型
+#    （随机初始化，seed 17）
+python scripts/make_random_init.py base/Qwen3.5-0.8B <随机初始化目录>
 
 # 3) 启动推理引擎
 bash engine/launch_engine.sh <base模型> 30001
