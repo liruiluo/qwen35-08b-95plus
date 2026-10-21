@@ -15,7 +15,7 @@
 | SPHERE-Last-Adaptive | `last_adaptive` | 最后一个 MLP 层、自适应 α |
 | SPHERE-All-Adaptive | `all_hidden_adaptive` | 全部 24 层、逐层求和 |
 | SPHERE-Last-Fixed | `last_fixed` | 最后一个 MLP 层、固定 α=1 |
-| GRPO 基线 | （任意臂 + `--rho 0`） | 关闭 SPHERE 谱正则项，纯 GRPO |
+| GRPO 基线 | （`--arm` 任意 + `--rho 0`） | 关闭 SPHERE 谱正则项，纯 GRPO |
 
 ## 权重获取（不入 git；sha256 逐一核对）
 
@@ -24,7 +24,7 @@ canonical 存放点：训练服务器 `/root/train95/ckpt/` 与 `/root/models/`�
 按 sha256 校验后放置到本目录各子目录（只需顶层文件，`step*/` 中间检查点不必拷贝）：
 
 ```bash
-# 例（经跳板 jd 拉 SPHERE-Last-Adaptive）：
+# 例（从训练服务器拉取 SPHERE-Last-Adaptive）：
 ssh jd "ssh -p 22228 -i /root/.ssh/id_ed25519_devbox_tailnet_20260627 root@6.235.104.34 \
   'tar czf - -C /root/train95/ckpt/jb-interpdef4s2000-last_adaptive --exclude=step* .'" \
   | tar xzf - -C SNIPS/models/SPHERE-Last-Adaptive/
