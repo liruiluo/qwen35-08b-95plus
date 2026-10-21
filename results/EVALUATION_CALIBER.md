@@ -17,7 +17,7 @@ span-exact micro-F1 在本仓库作为附加证据线保留，不作为达标线
 **主口径 = JointBERT 标准 13,084 / 700 / 700 划分上的 test 集（700 条）
 意图准确率。**
 
-依据链（每条都经过实证核查，非转述）：
+依据链：
 
 1. **LLM2LLM 报的是 test 准确率**。论文原文（arXiv 2403.15042）：
    > "To measure the efficacy of LLM2LLM, we fine-tune the student model
@@ -58,7 +58,7 @@ token-Jaccard≥0.8 匹配为 567/700。）
 **推论**：若用官方 train（13,784）训练、在 JointBERT test 上报数，
 等于在 2/3 的考卷上训练过——train-on-test。因此主口径交付数字是
 **在 JointBERT train（13,084）上重新单次训练、在 JointBERT test 上
-评测**得到的；旧官方语料训练的三臂（在官方 validate 上的
+评测**得到的；旧官方语料训练的三个算法模型（在官方 validate 上的
 96.14 / 96.43 / 97.00）降级为附加证据线：那组数字本身干净
 （validate 从未进训练），但不是文献可比的 test 口径。
 
@@ -73,7 +73,7 @@ token-Jaccard≥0.8 匹配为 567/700。）
 - 评测与训练同渲染协议（protocol B，见 README）。
 
 完整命令见 README「复现训练」一节；
-`scripts/run_snips_jointbert.sh` 是三臂串行的原始 campaign 脚本。
+`scripts/run_snips_jointbert.sh` 是三个算法模型串行训练的原始脚本。
 
 ## 5. 证据文件索引
 
@@ -94,9 +94,9 @@ results/
     <arm>/curves.csv               每 step 奖励 + 50 步滚动均值
     <arm>/blocks.csv               100 步块均值
     base-test-score.txt            base 零样本 test 起点
-  curves-jointbert-split.png       主口径三臂训练曲线图
+  curves-jointbert-split.png       主口径三算法训练曲线图
   official-split/                  ← 附加证据线（官方 validate 口径）
-    （同构的 per-arm 证据 + base 零样本 + 语料关系取证）
+    （各算法同构证据 + base 零样本 + 语料关系取证）
   curves-official-split.png
 ```
 

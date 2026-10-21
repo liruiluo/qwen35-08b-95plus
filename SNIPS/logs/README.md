@@ -16,11 +16,10 @@
 ## 高效性判据（N<M）的取数方法
 
 大纲 4.2.2.4(3) 第 4 步要求"错误率达到 5% 所需训练迭代次数"的对比。
-取数方法：各模型训练均每 200 步存检查点（各模型目录的 `step{200..2000}`；
-GRPO 基线训练命令见 `SNIPS/models/GRPO-baseline/README.md`），用
-`methods/push_ckpt.py` + `SNIPS/eval_snips.py` 对每个检查点跑一次
-test 集评测，得到错误率-步数曲线；N = 各 SPHERE 模型首次 ≤5% 的步数，
-M = GRPO 基线首次 ≤5% 的步数。曲线作图脚本 `scripts/plot_songce_curves.py`。
+各模型训练时每 200 步保存检查点。对每个检查点用 `methods/push_ckpt.py`
+加载权重后，以 `SNIPS/eval_snips.py` 跑一次 test 集评测，得到
+错误率-步数曲线。N = 各 SPHERE 模型首次 ≤5% 的步数；M = GRPO 基线
+首次 ≤5% 的步数。曲线图由 `scripts/plot_songce_curves.py` 生成。
 
 ## curves.csv 字段
 

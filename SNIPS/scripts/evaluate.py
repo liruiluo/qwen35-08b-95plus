@@ -19,7 +19,7 @@
 判定（测试大纲 4.2.2.5）：
   A = 训练前模型的错误率（预期 100%）；B = 各算法训练后模型的错误率。
   合格判据 B < A×5% = 5%；高效性判据：错误率达到 5% 所需训练步数
-  N（SPHERE 各臂）< M（GRPO 基线），见 SNIPS/logs/ 的训练曲线。
+  N（SPHERE 各算法）< M（GRPO 基线），见 SNIPS/logs/ 的训练曲线。
 """
 import argparse
 import os
