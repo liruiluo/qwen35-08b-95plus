@@ -1,7 +1,8 @@
-# Train Qwen3.5-0.8B to 96%+ on SNIPS intent classification with RL (GRPO + SPHERE)
+# Train Qwen3.5-0.8B to 97%+ on SNIPS intent classification with RL (GRPO + SPHERE)
 
 本仓库用**纯强化学习**（GRPO + SPHERE 正则，无 SFT 初始化）把
-Qwen3.5-0.8B 在 SNIPS NLU 意图分类（7 类单选）上训练到 **96.14%**。
+Qwen3.5-0.8B 在 SNIPS NLU 意图分类（7 类单选）上训练到 **97.14%**
+（BERT 监督上限 97.2% 同水平）。
 评测口径与 [LLM2LLM, ACL Findings 2024](https://arxiv.org/abs/2403.15042)
 的报数协议一致——**test 集准确率**，语料为文献标准的
 [JointBERT 划分](https://github.com/monologg/JointBERT)（Train 13,084 /
@@ -19,8 +20,8 @@ Dev 700 / Test 700）。
   提示携带七条意图定义，全部从**训练集统计**归纳（每条关键词有计数
   背书），在 **dev 上调参**；test 每版本**只评一次**，四个版本全部
   如实报出，交付 = v4。
-- **训练**：`last_adaptive` 臂、group 16、lr 3e-6、seed 17、1000 步、
-  0.5×intent + 0.5×shaped-slot 奖励（与生成曲线全程一致的单一配方）。
+- **训练**：`last_adaptive` 臂、group 16、lr 3e-6、seed 17、**2000 步**、
+  0.5×intent + 0.5×shaped-slot 奖励（单一配方单次运行）。
 
 | 版本（其他全同） | test intent | dev | 说明 |
 |---|---|---|---|
@@ -30,12 +31,19 @@ Dev 700 / Test 700）。
 | 定义 v1（1000 步） | 94.71% | 95.71% | 初版；"查歌=SCW"条款过冲 |
 | 定义 v2 | 95.14% | 97.43% | soundtrack/EP 归位 PlayMusic |
 | 定义 v3 | 95.86% | 97.86% | 天气/TV 剧集/is-playing/give-stars |
-| **定义 v4（交付）** | **96.14%** | 97.43% | 看片主规则 + SCW 反条款 |
+| 定义 v4 @1000 步 | 96.14% | 97.43% | 看片主规则 + SCW 反条款 |
+| **定义 v4 @2000 步（交付）** | **97.14%** | **99.14%** | 同配方，仅步数 1000→2000 |
 
-即判据 B 侧错误率 **3.86%**（A 侧 100% → B 侧 <5%），与
-`results/jb-interpdef4/` 的证据文件一一对应。剩余 27 错中 24 道与
-无定义基线共享（语料冲突地板：裸片名 find/see/watch 双标并存、
-play+歌名 gold 对抗训练分布），BERT 监督上限 97.2% 撞同一地板。
+步长消融（同一配方、快照实测）：600=95.43 / 800=95.71 / 1000=96.14 /
+2000=97.14——**定义版配方到 2000 步仍在收敛**（末段 1000 步修 8 道新坏
+1 道），与无定义配方形成对照（后者 600 步即平台、后 2400 步意图零涨）：
+定义把语料约定变成 RL 可学的信号，也改变了学习动力学的形状。
+
+即判据 B 侧错误率 **2.86%**（A 侧 100% → B 侧 <5%），与
+`results/jb-interpdef4s2000/` 的证据文件一一对应。剩余 20 错中 17 道
+与无定义基线共享（语料冲突地板：9 道 play+歌名 gold 对抗训练集 747:26
+大种群、8 道裸片名 find/watch 双标并存、加 3 角落题），BERT 监督上限
+97.2% 撞同一地板——纯 RL 已到达监督天花板水平。
 
 第一代三臂战役（无插值、无定义、2000 步，仍作为方法证据保留）：
 
@@ -230,7 +238,8 @@ scripts/run_def4.sh        # the deliverable campaign (v4: data, train, eval)
 scripts/run_snips_jointbert.sh  # first-gen three-arm campaign
 scripts/plot_curves.py     # training curves from per-step evidence
 results/EVALUATION_CALIBER.md  # evaluation caliber + evidence index
-results/jb-interpdef4/     # deliverable evidence (scores + evidence.json)
+results/jb-interpdef4s2000/ # deliverable evidence (scores + evidence.json)
+results/jb-interpdef4/     # 1000-step variant evidence
 results/jb-interpdef2/     # v2 evidence (scores + evidence.json)
 results/jointbert-split/   # first-gen per-arm evidence
 results/official-split/    # secondary-caliber run evidence + corpus relation
@@ -248,10 +257,11 @@ never trained on):
 | RandomInit zero-shot (criterion A) | 0.00% | 0.00% |
 | base zero-shot | 80.71% | 15.57% |
 | interp-start, no definitions, 3000 steps | 95.00% | 73.83% |
-| **interp-start + definitions v4, 1000 steps (deliverable)** | **96.14%** | 62.72% |
+| interp-start + definitions v4, 1000 steps | 96.14% | 62.72% |
+| **interp-start + definitions v4, 2000 steps (deliverable)** | **97.14%** | 70.19% |
 
 (Definition versions v1-v3 test: 94.71 / 95.14 / 95.86 — see the table
-above; dev diagnostics 95.71 / 97.43 / 97.86 / 97.43. Ablation:
+above; dev diagnostics 95.71 / 97.43 / 97.86 / 97.43 / 99.14. Ablation:
 intent-only reward, single variable vs the 95.00% run, oscillates wider
 on intent — 94.29@600 / 91.29@1000 / 94.57@1200 — and slots collapse to
 zero: the slot half of the reward is the gradient supply and damping,
@@ -315,7 +325,7 @@ cd ../bfcl && python gen_train_data.py --out-dir data \
 bash engine/launch_engine.sh /path/to/Qwen3.5-0.8B 30001
 ```
 
-### 3. Train the deliverable (interp start + definitions, exact recipe of 96.14%)
+### 3. Train the deliverable (interp start + definitions, exact recipe of 97.14%)
 
 ```bash
 # a) build the random-reset model for the interpolation narrative
@@ -326,12 +336,12 @@ python scripts/make_random_init.py /path/to/Qwen3.5-0.8B \
 cd snips && python prepare_jointbert.py --src ../jointbert-snips \
     --out-dir data-jbdef --definitions && cd ..
 
-# c) train: serve-side interpolation for 100 steps, then pure RL to 1000
+# c) train: serve-side interpolation for 100 steps, then pure RL to 2000
 python methods/rl_interp.py --data snips/data-jbdef/train.jsonl \
     --base /path/to/Qwen3.5-0.8B \
     --interp-base /path/to/Qwen3.5-0.8B-RandomInit --interp-steps 100 \
     --rollout-url http://127.0.0.1:30001 --arm last_adaptive --reward snips \
-    --out ckpt/jb-interpdef4-last_adaptive --steps 1000 --group 16 \
+    --out ckpt/jb-interpdef4s2000-last_adaptive --steps 2000 --group 16 \
     --prompts-per-step 4 --lr 3e-6 --max-new-tokens 160 --seed 17 \
     --save-every 200
 ```
