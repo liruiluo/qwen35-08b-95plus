@@ -2,7 +2,7 @@
 
 本文件记录交付数字的评测口径（在哪个划分上、按什么协议报数）、
 口径选择的依据、以及支持复现的全部证据文件索引。
-最后更新：2026-10-20（JointBERT test 口径重训后；补全证据索引）。
+最后更新：2026-10-21（三算法 + 基线统一配方重训收官；五模型证据齐）。
 
 ## 1. 任务范围
 
@@ -73,7 +73,7 @@ span-exact micro-F1 在本仓库作为附加证据线保留，不作为达标线
   common/bproto.py 统一实现）。
 
 完整命令见 README「复现训练」一节；
-`scripts/run_songce_*.sh` 是三个算法模型串行训练的原始脚本
+`scripts/run_songce_*.sh` 是四个模型（三算法 + 基线）串行训练的原始脚本
 （训练服务器布局）。
 
 ## 5. 证据文件索引
@@ -81,23 +81,24 @@ span-exact micro-F1 在本仓库作为附加证据线保留，不作为达标线
 ```
 results/
   EVALUATION_CALIBER.md            ← 本文件（口径）
-  sphere-last-adaptive/            ← 交付模型（97.14%）单次运行证据
-    （evidence.json + final-{dev,test}.jsonl 逐例 + 分数文件）
+  sphere-last-adaptive/            ← SPHERE-Last-Adaptive（97.14%）单次运行证据
+  sphere-all-adaptive/             ← SPHERE-All-Adaptive（96.00%）同构证据
+  sphere-last-fixed/               ← SPHERE-Last-Fixed（96.43%）同构证据
+  grpo-baseline/                   ← GRPO 基线（95.86%）同构证据
   randominit/                      ← 训练前模型（A）test 证据
-    （final-test.jsonl 逐例 + 分数文件）
-  jointbert-split/                 ← 主口径（test 报数）证据
+  （前四者：evidence.json + final-{dev,test}.jsonl 逐例 + 分数文件；
+    randominit：final-test.jsonl 逐例 + 分数文件）
+  jointbert-split/                 ← 更早一代同划分运行记录（数据变体较旧，
+                                     保留作附加证据线；交付数字全部来自上面
+                                     五个模型目录）
     <arm>/evidence.json           运行配置 + 每 step 记录（g_ppo、
                                    g_sphere、lambda、mean_reward、
                                    action_tokens、replay 校验量）
     <arm>/trainer.log              训练器全程 stdout 日志
-    <arm>/eval-test.jsonl          test 700 条逐例输出（含预测 JSON）
-    <arm>/eval-test-score.txt      test 分数（逐字）
-    <arm>/eval-dev.jsonl           dev 700 条逐例输出（诊断）
-    <arm>/eval-dev-score.txt       dev 分数（辅助诊断，从未用于选择）
-    <arm>/curves.csv               每 step 奖励 + 50 步滚动均值
-    <arm>/blocks.csv               100 步块均值
+    <arm>/eval-{test,dev}.jsonl    test/dev 逐例输出（含预测 JSON）
+    <arm>/eval-{test,dev}-score.txt 分数（逐字）
     base-test-score.txt            base 零样本 test 起点
-  curves-jointbert-split.png       主口径三算法训练曲线图
+  curves-jointbert-split.png       早期一代训练曲线图
   official-split/                  ← 附加证据线（官方 validate 口径）
     （各算法同构证据 + base 零样本 + 语料关系取证）
   curves-official-split.png

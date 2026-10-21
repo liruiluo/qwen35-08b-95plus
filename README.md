@@ -13,11 +13,9 @@ JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次�
 |---|---|---|---|
 | 训练前模型（随机初始化，seed 17，A） | 0.00% | 100% | — |
 | **SPHERE-Last-Adaptive（交付）** | **97.14%** | **2.86%** | **通过** |
-| SPHERE-All-Adaptive | 统一配方训练中† | | |
-| SPHERE-Last-Fixed | 统一配方训练中† | | |
-| GRPO 基线 | 训练中† | | |
-
-† 训练进行中，完成后更新此表。
+| SPHERE-All-Adaptive | 96.00% | 4.00% | 通过 |
+| SPHERE-Last-Fixed | 96.43% | 3.57% | 通过 |
+| GRPO 基线 | 95.86% | 4.14% | 通过 |
 
 ## 评测
 

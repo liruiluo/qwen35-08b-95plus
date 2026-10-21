@@ -1,0 +1,5 @@
+model=SPHERE-Last-Fixed
+n=700 wall=15.2s
+INTENT_ACC=98.14%
+SLOT_P=71.87% SLOT_R=61.37% SLOT_F1=66.21%
+TP=1101 FP=431 FN=693 unparsable=0

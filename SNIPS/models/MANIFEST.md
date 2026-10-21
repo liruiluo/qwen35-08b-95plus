@@ -3,10 +3,10 @@
 | 目录 | 大纲角色 | 状态 | test 错误率（实测） |
 |---|---|---|---|
 | `RandomInit/` | 训练前模型（判据 A） | ✅ 权重随材料交付 | **100%**（700/700 不可解析，意图准确率 0.00%） |
-| `GRPO-baseline/` | 基线算法模型（GRPO，rho=0） | ⏳ **待训练** | — |
+| `GRPO-baseline/` | 基线算法模型（GRPO，rho=0） | ✅ 权重随材料交付 | **4.14%**（意图准确率 95.86%） |
 | `SPHERE-Last-Adaptive/` | 项目算法 1（交付） | ✅ 权重随材料交付 | **2.86%**（意图准确率 97.14%） |
-| `SPHERE-All-Adaptive/` | 项目算法 2 | 统一配方重训中† | — |
-| `SPHERE-Last-Fixed/` | 项目算法 3 | 统一配方重训中† | — |
+| `SPHERE-All-Adaptive/` | 项目算法 2 | ✅ 权重随材料交付 | **4.00%**（意图准确率 96.00%） |
+| `SPHERE-Last-Fixed/` | 项目算法 3 | ✅ 权重随材料交付 | **3.57%**（意图准确率 96.43%） |
 
 ## 命名映射（大纲名称 ↔ 代码名）
 
@@ -33,9 +33,9 @@ sha256sum SNIPS/models/<模型名>/model.safetensors   # macOS: shasum -a 256 <�
 |---|---|
 | RandomInit | `aa430a35da2d2855f8059cb45a7f28c2753f94ccb6ff363ea053e76922b31130` |
 | SPHERE-Last-Adaptive | `d24f3ff584704c8f5ba8042163eb69efdf92cdff76b0be2157bb621357e3c006` |
-| SPHERE-All-Adaptive | （重训完成后更新） | — |
-| SPHERE-Last-Fixed | （重训完成后更新） | — |
-| GRPO-baseline | （待训练，见 `GRPO-baseline/README.md`） | — |
+| SPHERE-All-Adaptive | `118b1a7dac62e9ac85b662a871c2301535ef744482f2d579facf5b51abefcd68` |
+| SPHERE-Last-Fixed | `4cd370e9ec7d5841c488fbb7e9e9c7948c91ac595342a59f946fdc6846b6c163` |
+| GRPO-baseline | `979d8c14dbb00998454e86c2ac6a1d9624e12a6545b7526d2b507416eedf5342` |
 
 RandomInit 由 `scripts/make_random_init.py`（seed 17）从
 Qwen3.5-0.8B 随机重置生成，可离线复现。
