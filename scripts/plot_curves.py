@@ -5,7 +5,7 @@ Scans the per-arm evidence files written by methods/sphere_grpo.py:
 
     results/<corpus>/<arm>/evidence.json
 
-where <corpus> is one of the SNIPS calibers (`official-split`,
+where <corpus> is one of the SNIPS splits (`official-split`,
 `jointbert-split`). Each evidence.json holds the run config plus one record
 per optimizer step (g_ppo, g_sphere, lambda, mean_reward, action_tokens, ...).
 

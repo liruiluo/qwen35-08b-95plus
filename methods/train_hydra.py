@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""Hydra 渲染层：把 configs/songce/<车>.yaml 渲染成 methods/rl_interp.py 的
-精确 argv 并执行。训练器本体零改动——argv 恒等即行为恒等；config 文件
-成为逐车可 diff 的配方证据。
+"""训练入口：读取 configs/songce/<配置名>.yaml 并启动训练。
 
-用法（工作目录 = 仓库根 / pod 的 /root/train95）：
-  python methods/train_hydra.py -cn all_adaptive             # 训练（先打印 TRAIN_ARGV）
-  python methods/train_hydra.py -cn grpo_baseline run=false  # 只打印 argv 不执行
+用法（仓库根目录）：
+  python methods/train_hydra.py -cn all_adaptive             # 训练
+  python methods/train_hydra.py -cn grpo_baseline run=false  # 只打印训练命令，不执行
 """
 import os
 import shlex

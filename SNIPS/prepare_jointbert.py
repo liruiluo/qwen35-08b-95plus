@@ -3,11 +3,11 @@
 
 Source: monologg/JointBERT repo, data/snips/{train,dev,test}/{seq.in,seq.out,label}
         (the literature-standard 13,084/700/700 division of the SNIPS NLU
-        corpus — the caliber JointBERT/Stack-Propagation-style papers report
-        on, and the test-set caliber LLM2LLM-style reporting assumes).
+        corpus — the split JointBERT/Stack-Propagation-style papers report
+        on, and the test-set split LLM2LLM-style reporting assumes).
         The official snipsco/nlu-benchmark repo ships NO test split, and its
         train file substantially overlaps the JointBERT test set, so
-        test-caliber numbers must be trained on THIS split.
+        test-set numbers must be trained on THIS split.
 
 Input:  <src>/{train,dev,test}-{seq.in,seq.out,label}
 Output: <out-dir>/{train,dev,test}.jsonl + schema.json in the

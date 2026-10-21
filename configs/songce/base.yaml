@@ -1,6 +1,5 @@
-# 交付配方共享字段——所有臂与基线的唯一变量 = arm / rho / lr（见各臂 yaml）。
-# 渲染层 = methods/train_hydra.py：config → rl_interp.py 精确 argv，训练器零改动。
-# 路径为训练服务器布局（/root/train95 为工作目录）。
+# 交付配方共享字段——各配置与基线的唯一变量 = arm / rho / lr（见各配置文件）。
+# 路径为训练服务器布局，本机复现时按环境修改。
 data: snips/data-jbdef4/train.jsonl
 base: /root/models/Qwen3.5-0.8B
 interp_base: /root/models/Qwen3.5-0.8B-RandomInit

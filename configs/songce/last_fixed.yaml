@@ -1,4 +1,4 @@
-# SPHERE-Last-Fixed 臂 · 交付配方（vs 交付臂唯一变量 = arm）
+# SPHERE-Last-Fixed · 交付配方（与 last_adaptive 唯一变量 = arm）
 defaults:
   - base
 tag: jb-interpdef4s2000-last_fixed

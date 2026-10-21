@@ -1,6 +1,6 @@
 #!/bin/bash
-# GRPO 基线 · 交付配方（config = configs/songce/grpo_baseline.yaml，配方唯一来源；
-# 本脚本 = 引擎检查 → 训练 → 权重加载 → dev/test 评测；训练服务器布局）
+# GRPO 基线训练（config = configs/songce/grpo_baseline.yaml；
+# 引擎检查 → 训练 → 权重加载 → dev/test 评测；训练服务器布局）
 set -u
 cd /root/train95
 PY=/root/h3venv/bin/python

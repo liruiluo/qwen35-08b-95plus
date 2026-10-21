@@ -5,7 +5,7 @@ set -euo pipefail
 MODEL=${1:?usage: launch_engine.sh <model_path> [port]}
 PORT=${2:-30000}
 
-# stop any previous engine (verify the loaded model after swaps!)
+# stop any previous engine
 pkill -f "sglang.launch_server" 2>/dev/null || true
 sleep 10
 

@@ -1,4 +1,4 @@
-# SPHERE-All-Adaptive 臂 · 交付配方（vs 交付臂唯一变量 = arm）
+# SPHERE-All-Adaptive · 交付配方（与 last_adaptive 唯一变量 = arm）
 defaults:
   - base
 tag: jb-interpdef4s2000-all_hidden_adaptive

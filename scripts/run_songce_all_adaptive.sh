@@ -1,6 +1,6 @@
 #!/bin/bash
-# SPHERE-All-Adaptive 臂 · 交付配方（config = configs/songce/all_adaptive.yaml，配方唯一来源；
-# 本脚本 = 引擎检查 → 训练 → 权重加载 → dev/test 评测；训练服务器布局）
+# SPHERE-All-Adaptive 训练（config = configs/songce/all_adaptive.yaml；
+# 引擎检查 → 训练 → 权重加载 → dev/test 评测；训练服务器布局）
 set -u
 cd /root/train95
 PY=/root/h3venv/bin/python
