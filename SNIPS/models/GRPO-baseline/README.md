@@ -12,6 +12,5 @@ SPHERE 谱正则项（纯 GRPO）与基线学习率；数据、步数、种子�
 训练命令（配置唯一来源 = `configs/songce/grpo_baseline.yaml`）：
 ```bash
 python methods/train_hydra.py -cn grpo_baseline   # 渲染为训练器的精确 argv 并执行
-bash scripts/run_songce_grpobase.sh               # 完整流程：训练 → 权重加载 → 评测
 ```
 基线与交付模型的差异仅两个字段：`rho: 0.0`（关闭谱正则）、`lr: 1.5e-6`（基线学习率）。

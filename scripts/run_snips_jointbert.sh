@@ -5,7 +5,7 @@
 # train -> eval on test (primary) and dev (secondary).
 #
 # Infrastructure resilience (does NOT weaken the single-run guarantee):
-# if a training attempt dies from an infrastructure fault (this pod is
+# if a training attempt dies from an infrastructure fault (this host is
 # shared; a co-tenant's cleanup once killed the rollout engine mid-run),
 # the WHOLE arm is restarted FROM SCRATCH — never resumed, never patched.
 # Only a run that completes all steps uninterrupted becomes the reported
