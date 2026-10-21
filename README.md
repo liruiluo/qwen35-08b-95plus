@@ -1,8 +1,8 @@
-# SNIPS 指令认知识别 · 纯强化学习训练（GRPO + SPHERE）
+# SNIPS 指令认知识别
 
 本仓库将 Qwen3.5-0.8B 通过**纯强化学习**在 SNIPS 任务上训练至
 **test 集 7 类意图分类准确率 97.14%**，对应国家科技重大专项课题二
-「交互式通讯学习算法体系」第三场景（指令认知识别）。三种算法
+「交互式通讯学习算法体系」第三场景。三种算法
 SPHERE-Last-Adaptive / SPHERE-All-Adaptive / SPHERE-Last-Fixed 与
 GRPO 基线按《测试大纲》4.2.2 组织在 `SNIPS/` 目录，评测步骤见下文
 「评测」。
