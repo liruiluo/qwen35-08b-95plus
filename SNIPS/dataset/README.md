@@ -29,11 +29,3 @@ test 集重叠 464/700——在官方 train 上训练再报 test 数等于 train
 `results/official-split/corpus-relation.txt`。官方划分的附加结果
 （train 13,784 / validate 700）保留在 `results/official-split/`，
 不作为主结果。
-
-数据 sha256：
-
-```
-47d5f20f460bab8056290409826c0f9208a6e75d624e158da3ab2b10c6b7db52  train.jsonl
-95a40d7de55cca3b1d536046b72add37fdf18cd2d46d34c65a15f68a4ce547ab  dev.jsonl
-498ca42bd3069ff2838fd1679d104803c2a04db2a25fb0e87aef15583ab4efbb  test.jsonl
-```
