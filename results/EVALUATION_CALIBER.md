@@ -6,7 +6,8 @@
 
 ## 1. 任务范围
 
-SNIPS NLU **意图分类**（intent classification，7 类单选）。这与
+测试大纲 4.2.2.2 将本场景称为**指令认知识别**（SNIPS 数据集），
+其评价指标为 7 类**意图分类**准确率。这与
 [LLM2LLM (ACL Findings 2024)](https://arxiv.org/abs/2403.15042) 在 SNIPS
 上的任务面一致：LLM2LLM 同样只做意图分类，不做槽位填充。槽位
 span-exact micro-F1 在本仓库作为附加证据线保留，不作为达标线。
