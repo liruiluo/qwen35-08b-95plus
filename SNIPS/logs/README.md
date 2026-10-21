@@ -5,7 +5,7 @@
 
 | 子目录 | 内容 | 说明 |
 |---|---|---|
-| `SPHERE-Last-Adaptive/` | `curves.csv`（step, mean_reward, roll50）+ `training-log.jsonl`（逐步全量证据：g_ppo/g_sphere/lambda/sphere_loss/interp_alpha/replay 校验） | 交付臂，2000 步；前 100 步为插值退火期（reward=0、梯度精确为 0，机制透明说明见根 README） |
+| `SPHERE-Last-Adaptive/` | `curves.csv`（step, mean_reward, roll50）+ `training-log.jsonl`（逐步训练证据） | 交付臂，2000 步 |
 | `SPHERE-All-Adaptive/` | `curves.csv` | 第一代战役臂，2000 步 |
 | `SPHERE-Last-Fixed/` | `curves.csv` | 第一代战役臂，2000 步 |
 | `GRPO-baseline/` | （待训练） | 基线曲线 + 中间检查点评测，跑完补入 |

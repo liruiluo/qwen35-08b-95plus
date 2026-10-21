@@ -1,7 +1,7 @@
 # SPHERE-Last-Adaptive（交付臂）
 
-- 训练配方：重置插值起点 + 纯 RL（GRPO + SPHERE 谱塑性正则，last_adaptive 臂）
-  + 意图定义提示 v4 + 2000 步（group 16、lr 3e-6、seed 17，单次运行）。
+- 训练配方：纯 RL（GRPO + SPHERE 谱塑性正则，last_adaptive 臂）+
+  意图定义提示 v4 + 2000 步（group 16、lr 3e-6、seed 17，单次运行）。
 - 结果：**test 意图准确率 97.14%（错误率 2.86%，判据 B≤5% 合格）**，
   dev 99.14%；槽位 span-exact micro-F1 70.19%（附加指标）。
 - 证据：`results/jb-interpdef4s2000/`（evidence.json + 逐例 jsonl + 分数文件）；

@@ -49,13 +49,10 @@ bash scripts/get_data.sh
 cd SNIPS && python prepare_jointbert.py --src ../jointbert-snips \
     --out-dir data-jbdef --definitions && cd ..
 
-# 2) 随机初始化模型（插值起点用，seed 17）
-python scripts/make_random_init.py <base模型> <输出目录>
-
-# 3) 启动推理引擎
+# 2) 启动推理引擎
 bash engine/launch_engine.sh <base模型> 30001
 
-# 4) 训练（每车一个 hydra 配置，见 configs/songce/）
+# 3) 训练（每车一个 hydra 配置，见 configs/songce/）
 python methods/train_hydra.py -cn all_adaptive     # SPHERE-All-Adaptive
 python methods/train_hydra.py -cn last_fixed       # SPHERE-Last-Fixed
 python methods/train_hydra.py -cn grpo_baseline    # GRPO 基线
@@ -74,14 +71,8 @@ Parseval 型正则，强度固定为 GRPO 梯度的 0.1%（rho=1e-3）。三种�
 （All-Adaptive），仅最后一层、固定 α=1（Last-Fixed）；GRPO 基线即
 关闭该正则项（rho=0）。
 
-两个训练设计：
-
-- **插值起点**：训练前 100 步将引擎权重设为 α·随机初始化 +
-  (1−α)·训练权重（α 线性退火 1→0），使训练前模型（错误率 100%）
-  与训练起点严格一致；退火期输出不可解析、梯度精确为 0，不改变
-  训练动力学。
-- **意图定义提示**：系统提示含七条意图定义，全部由训练集统计归纳，
-  在开发集上调参；test 集每个版本只评测一次。
+训练设计：系统提示含七条**意图定义**，全部由训练集统计归纳，
+在开发集上调参；test 集每个版本只评测一次。
 
 评测协议：训练与评测使用同一渲染层（本地渲染 chat template，token
 id 直送引擎），评测口径采用 JointBERT 标准划分（SNIPS 官方 train
