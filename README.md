@@ -23,9 +23,10 @@ Test 700），test 集单次评测：
 
 ## 评测
 
-`SNIPS/` 按测试大纲 4.2.2.4(3) 组织：`dataset/` 测试数据（含 sha256
-校验）、`models/` 五个模型目录与权重清单（`MANIFEST.md`）、`logs/`
-各模型训练曲线、`scripts/evaluate.py` 评测入口。
+`SNIPS/` 按测试大纲 4.2.2.4(3) 组织：`SNIPS/dataset/` 测试数据（含
+sha256 校验）、`SNIPS/models/` 五个模型目录与权重清单
+（`SNIPS/models/MANIFEST.md`）、`SNIPS/logs/` 各模型训练曲线、
+`SNIPS/scripts/evaluate.py` 评测入口。
 
 环境：单张 GPU；Python ≥3.10；`pip install -r requirements.txt`。
 运行前将五个模型权重放入 `SNIPS/models/` 各子目录（HF 格式，
