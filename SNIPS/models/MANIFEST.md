@@ -17,7 +17,7 @@
 | SPHERE-Last-Fixed | `last_fixed` | 最后一个 MLP 层、固定 α=1 |
 | GRPO 基线 | （`--arm` 任意 + `--rho 0`） | 关闭 SPHERE 谱正则项，纯 GRPO |
 
-## 权重获取（不入 git；sha256 逐一核对）
+## 权重获取
 
 权重为 HF 格式目录（`model.safetensors` + config + tokenizer），随
 送测材料交付；按下方 sha256 清单核对后放置到本目录各子目录（只需
@@ -27,7 +27,7 @@
 sha256sum SNIPS/models/<模型名>/model.safetensors   # macOS: shasum -a 256 <同路径>
 ```
 
-## sha256 清单（2026-10-21 实测）
+## sha256 清单
 
 | 模型 | model.safetensors sha256 |
 |---|---|
