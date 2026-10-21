@@ -1,6 +1,6 @@
 # SPHERE-Last-Adaptive（交付）
 
-- 训练配方：纯 RL（GRPO + SPHERE 谱塑性正则）+ 意图定义提示 +
+- 训练配方：强化学习（GRPO + SPHERE 谱塑性正则）+ 意图定义提示 +
   2000 步（group 16、lr 3e-6、seed 17）。
 - 结果：**test 意图准确率 97.14%，错误率 2.86%（判据 B≤5% 合格）**。
 - 证据：`results/sphere-last-adaptive/`（evidence.json + 逐例 jsonl + 分数文件）；

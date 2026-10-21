@@ -1,6 +1,6 @@
 # SNIPS 指令认知识别
 
-本仓库将 Qwen3.5-0.8B 通过**纯强化学习**在 SNIPS 任务上训练至
+本仓库将 Qwen3.5-0.8B 通过**强化学习**在 SNIPS 任务上训练至
 **test 集 7 类意图分类准确率 97.14%**，对应国家科技重大专项课题二
 「交互式通讯学习算法体系」第三场景。三种算法
 SPHERE-Last-Adaptive / SPHERE-All-Adaptive / SPHERE-Last-Fixed 与
