@@ -28,6 +28,8 @@ Test 700），test 集单次评测：
 各模型训练曲线、`scripts/evaluate.py` 评测入口。
 
 环境：单张 GPU；Python ≥3.10；`pip install -r requirements.txt`。
+运行前将五个模型权重放入 `SNIPS/models/` 各子目录（HF 格式，
+sha256 清单见 `SNIPS/models/MANIFEST.md`）。
 
 ```bash
 python SNIPS/scripts/evaluate.py             # 遍历测试样本 → 五模型 → 错误率
@@ -45,7 +47,11 @@ bash scripts/get_data.sh
 cd SNIPS && python prepare_jointbert.py --src ../jointbert-snips \
     --out-dir data-jbdef --definitions && cd ..
 
-# 2) 启动推理引擎
+# 2) 模型：下载 Qwen3.5-0.8B 作为 <base模型>，
+#    并生成训练前模型（随机初始化，seed 17）
+python scripts/make_random_init.py <base模型> <随机初始化目录>
+
+# 3) 启动推理引擎
 bash engine/launch_engine.sh <base模型> 30001
 
 # 3) 训练（每车一个 hydra 配置，见 configs/songce/）
@@ -56,7 +62,8 @@ python methods/train_hydra.py -cn grpo_baseline   # GRPO 基线
 ```
 
 统一训练超参：group 16、lr 3e-6（基线 1.5e-6）、seed 17、2000 步、
-每 200 步保存检查点。
+每 200 步保存检查点。`configs/songce/base.yaml` 中的模型与数据路径
+为训练服务器路径，本机复现时按环境修改。
 
 ## 方法
 

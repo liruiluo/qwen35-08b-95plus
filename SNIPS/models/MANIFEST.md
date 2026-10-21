@@ -19,16 +19,12 @@
 
 ## 权重获取（不入 git；sha256 逐一核对）
 
-权重为 HF 格式目录（`model.safetensors` + config + tokenizer）。
-canonical 存放点：训练服务器 `/root/train95/ckpt/` 与 `/root/models/`。
-按 sha256 校验后放置到本目录各子目录（只需顶层文件，`step*/` 中间检查点不必拷贝）：
+权重为 HF 格式目录（`model.safetensors` + config + tokenizer），随
+送测材料交付；按下方 sha256 清单核对后放置到本目录各子目录（只需
+顶层文件，`step*/` 中间检查点不必拷贝）：
 
 ```bash
-# 例（从训练服务器拉取 SPHERE-Last-Adaptive）：
-ssh jd "ssh -p 22228 -i /root/.ssh/id_ed25519_devbox_tailnet_20260627 root@6.235.104.34 \
-  'tar czf - -C /root/train95/ckpt/jb-interpdef4s2000-last_adaptive --exclude=step* .'" \
-  | tar xzf - -C SNIPS/models/SPHERE-Last-Adaptive/
-shasum -a 256 SNIPS/models/SPHERE-Last-Adaptive/model.safetensors
+shasum -a 256 SNIPS/models/<模型名>/model.safetensors
 ```
 
 ## sha256 清单（训练服务器实测，2026-10-21）
