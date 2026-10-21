@@ -32,7 +32,7 @@ python SNIPS/scripts/evaluate.py             # 遍历测试样本 → 五模型 
 python SNIPS/scripts/evaluate.py --limit 20  # 冒烟
 ```
 
-脚本自动拉起推理引擎、逐模型热推权重，输出各模型错误率与判据标注
+脚本自动拉起推理引擎、逐模型加载权重，输出各模型错误率与判据标注
 （训练前模型预期 100%，项目算法模型 ≤5% 为合格）。
 
 ## 复现训练
