@@ -1,11 +1,43 @@
-# Train Qwen3.5-0.8B to 95%+ on SNIPS intent classification with RL (GRPO + SPHERE)
+# Train Qwen3.5-0.8B to 96%+ on SNIPS intent classification with RL (GRPO + SPHERE)
 
 本仓库用**纯强化学习**（GRPO + SPHERE 正则，无 SFT 初始化）把
-Qwen3.5-0.8B 在 SNIPS NLU 意图分类（7 类单选）上训练到 **95%+**。
+Qwen3.5-0.8B 在 SNIPS NLU 意图分类（7 类单选）上训练到 **96.14%**。
 评测口径与 [LLM2LLM, ACL Findings 2024](https://arxiv.org/abs/2403.15042)
 的报数协议一致——**test 集准确率**，语料为文献标准的
 [JointBERT 划分](https://github.com/monologg/JointBERT)（Train 13,084 /
-Dev 700 / Test 700）：
+Dev 700 / Test 700）。
+
+现役配方（交付线）= **重置插值起点 + 纯 RL + 意图定义提示**，单次运行：
+
+- **插值起点**（`methods/rl_interp.py`）：训练前 100 步在 serve 侧给引擎
+  推 α·W_reset + (1−α)·W_train（α 从 1 均匀退到 0，W_reset 为种子 17 的
+  随机重置权重），梯度只进训练血统 W_train。机制透明说明：退火期混权
+  模型的输出不可解析 → 组内奖励全 0 → 优势全 0 → **合并梯度精确为 0**，
+  W_train 在退火期逐位不变——插值是叙事/构造层（"从错误率 100% 的模型
+  出发"），不改变 RL 本身的动力学；step 100 起等效于 base + 纯 RL。
+- **意图定义提示**（`snips/prepare_jointbert.py --definitions`）：系统
+  提示携带七条意图定义，全部从**训练集统计**归纳（每条关键词有计数
+  背书），在 **dev 上调参**；test 每版本**只评一次**，四个版本全部
+  如实报出，交付 = v4。
+- **训练**：`last_adaptive` 臂、group 16、lr 3e-6、seed 17、1000 步、
+  0.5×intent + 0.5×shaped-slot 奖励（与生成曲线全程一致的单一配方）。
+
+| 版本（其他全同） | test intent | dev | 说明 |
+|---|---|---|---|
+| RandomInit (seed 17) zero-shot | **0.00%** | 0.00% | 判据 A：错误率 100% |
+| base zero-shot | 80.71% | — | |
+| 无定义 + 插值起点（3000 步） | 95.00% | 95.86% | 插值构造首个成车 |
+| 定义 v1（1000 步） | 94.71% | 95.71% | 初版；"查歌=SCW"条款过冲 |
+| 定义 v2 | 95.14% | 97.43% | soundtrack/EP 归位 PlayMusic |
+| 定义 v3 | 95.86% | 97.86% | 天气/TV 剧集/is-playing/give-stars |
+| **定义 v4（交付）** | **96.14%** | 97.43% | 看片主规则 + SCW 反条款 |
+
+即判据 B 侧错误率 **3.86%**（A 侧 100% → B 侧 <5%），与
+`results/jb-interpdef4/` 的证据文件一一对应。剩余 27 错中 24 道与
+无定义基线共享（语料冲突地板：裸片名 find/see/watch 双标并存、
+play+歌名 gold 对抗训练分布），BERT 监督上限 97.2% 撞同一地板。
+
+第一代三臂战役（无插值、无定义、2000 步，仍作为方法证据保留）：
 
 | SPHERE arm | steps | SNIPS intent accuracy (JointBERT **test** 700) |
 |---|---|---|
@@ -16,7 +48,8 @@ Dev 700 / Test 700）：
 三臂各自独立地从 base 单次训练：两臂过 95% 线；第三臂
 （`last_fixed`，官方语料口径下的最强臂）落在 94.86%——距线 1 题
 （700 题二项 SE≈0.8pp，在噪声带内），按单次配方如实报出，不做任何
-补训或挑选。
+补训或挑选。定义提示战役的调参纪律同上：规则只来自训练集统计与 dev
+证据，test 每版单发、四版数字全部在表。
 
 每一臂都是**从 base 一步到位的单次训练**（固定种子、固定步数、固定
 超参，见 Reproduction 一节的一条命令）——没有续训、没有按中间成绩的
@@ -32,7 +65,7 @@ test 数）见 **`results/EVALUATION_CALIBER.md`**；训练曲线见
 
 与 LLM2LLM 的对照：LLM2LLM（Llama-2-7B 学生模型，低数据增强场景）
 在 SNIPS 意图分类上报 92.14-93.86%（test 准确率，dev 选 checkpoint）；
-本仓库用小一个数量级的 Qwen3.5-0.8B、全量训练数据、纯 RL 达到 95%+。
+本仓库用小一个数量级的 Qwen3.5-0.8B、全量训练数据、纯 RL 达到 96.14%。
 其仓库只开源了 GSM8K 代码、SNIPS 文件清单未随文发布，故本仓库对齐其
 **报数协议**（test 准确率）+ 社区标准划分，不做逐样本严格对齐声明；
 两者场景不同（他们主打 few-shot 数据增强，本仓库主打 RL 训练方法），
@@ -46,12 +79,12 @@ test 数）见 **`results/EVALUATION_CALIBER.md`**；训练曲线见
 
 ## Measured starting points (zero-shot, protocol B — see "Protocol" below)
 
-| Corpus | Metric | base zero-shot |
-|---|---|---|
-| JointBERT test 700 (**primary**) | intent accuracy | 80.71% |
-| JointBERT test 700 | slot span-exact micro-F1 | 15.57% |
-| official validate 700 (secondary) | intent accuracy | 82.71% |
-| official validate 700 | slot span-exact micro-F1 | 19.38% |
+| Corpus | Metric | base zero-shot | RandomInit (seed 17) |
+|---|---|---|---|
+| JointBERT test 700 (**primary**) | intent accuracy | 80.71% | **0.00%** (700/700 unparsable) |
+| JointBERT test 700 | slot span-exact micro-F1 | 15.57% | 0.00% |
+| official validate 700 (secondary) | intent accuracy | 82.71% | — |
+| official validate 700 | slot span-exact micro-F1 | 19.38% | — |
 
 A supervised reference (SFT, **not** the deliverable — it exists to show the
 target is learnable by this model) reaches 98.86% intent / 96.68% slot-F1 on
@@ -173,12 +206,17 @@ protocol-B.
 
 ```
 methods/sphere_grpo.py     # the RL trainer (GRPO + SPHERE, sglang rollouts,
-                           #   weight push-back, per-step evidence)
+                           #   weight push-back, per-step evidence; reward_snips_intent
+                           #   is the intent-only ablation reward)
+methods/rl_interp.py       # interpolated-start RL trainer (serve-side
+                           #   alpha*W_reset + (1-alpha)*W_train for the first
+                           #   --interp-steps steps, gradients only into W_train)
 methods/push_ckpt.py      # hot-swap any checkpoint into a running engine
 common/bproto.py           # shared render+generate layer (train == eval)
 common/train_sft.py        # pure-torch SFT trainer (reference only)
 snips/prepare_data.py      # snipsco/nlu-benchmark -> jsonl (official split)
-snips/prepare_jointbert.py # JointBERT 13,084/700/700 -> jsonl (primary)
+snips/prepare_jointbert.py # JointBERT 13,084/700/700 -> jsonl (primary;
+                           #   --definitions appends the v4 intent definitions)
 snips/eval_snips.py        # protocol-B eval: intent acc + slot micro-F1
 bfcl/gen_train_data.py     # synthetic convention-family generator (v3:
                            #   20 families, 34.6k items, dedup-guarded
@@ -187,18 +225,40 @@ bfcl/ast_checker_official.py  # vendored official BFCL checker
 bfcl/eval_bfcl.py          # protocol-B eval + official strict scoring
 engine/launch_engine.sh    # sglang server launcher
 scripts/get_data.sh        # fetch SNIPS corpora + BFCL v4 eval data
-scripts/run_snips_jointbert.sh  # the three-arm single-run campaign (primary)
+scripts/make_random_init.py  # seed-17 random reinit (interp counterpart)
+scripts/run_def4.sh        # the deliverable campaign (v4: data, train, eval)
+scripts/run_snips_jointbert.sh  # first-gen three-arm campaign
 scripts/plot_curves.py     # training curves from per-step evidence
 results/EVALUATION_CALIBER.md  # evaluation caliber + evidence index
-results/jointbert-split/   # primary-caliber run evidence (per arm)
+results/jb-interpdef4/     # deliverable evidence (scores + evidence.json)
+results/jb-interpdef2/     # v2 evidence (scores + evidence.json)
+results/jointbert-split/   # first-gen per-arm evidence
 results/official-split/    # secondary-caliber run evidence + corpus relation
 results/curves-*.png       # training curves per caliber
 ```
 
 ## Results (full)
 
-Primary deliverable — single-run recipe, three SPHERE arms, JointBERT
-test split (700 utterances, never trained on):
+Primary deliverable — interpolated-start pure-RL run with intent
+definitions, `last_adaptive` arm, JointBERT test split (700 utterances,
+never trained on):
+
+| run | intent accuracy | slot micro-F1 (secondary) |
+|---|---|---|
+| RandomInit zero-shot (criterion A) | 0.00% | 0.00% |
+| base zero-shot | 80.71% | 15.57% |
+| interp-start, no definitions, 3000 steps | 95.00% | 73.83% |
+| **interp-start + definitions v4, 1000 steps (deliverable)** | **96.14%** | 62.72% |
+
+(Definition versions v1-v3 test: 94.71 / 95.14 / 95.86 — see the table
+above; dev diagnostics 95.71 / 97.43 / 97.86 / 97.43. Ablation:
+intent-only reward, single variable vs the 95.00% run, oscillates wider
+on intent — 94.29@600 / 91.29@1000 / 94.57@1200 — and slots collapse to
+zero: the slot half of the reward is the gradient supply and damping,
+not a distraction. Evidence in `results/jb-interp*/`.)
+
+First-generation campaign — no interpolation, no definitions, 2000
+steps, single run per arm from base:
 
 | arm | intent accuracy | slot micro-F1 (secondary) |
 |---|---|---|
@@ -255,7 +315,28 @@ cd ../bfcl && python gen_train_data.py --out-dir data \
 bash engine/launch_engine.sh /path/to/Qwen3.5-0.8B 30001
 ```
 
-### 3. Train an RL arm (the exact recipe of the reported numbers)
+### 3. Train the deliverable (interp start + definitions, exact recipe of 96.14%)
+
+```bash
+# a) build the random-reset model for the interpolation narrative
+python scripts/make_random_init.py /path/to/Qwen3.5-0.8B \
+    /path/to/Qwen3.5-0.8B-RandomInit          # seed 17 inside
+
+# b) data with intent definitions (v4, byte-identical to the deployed prompt)
+cd snips && python prepare_jointbert.py --src ../jointbert-snips \
+    --out-dir data-jbdef --definitions && cd ..
+
+# c) train: serve-side interpolation for 100 steps, then pure RL to 1000
+python methods/rl_interp.py --data snips/data-jbdef/train.jsonl \
+    --base /path/to/Qwen3.5-0.8B \
+    --interp-base /path/to/Qwen3.5-0.8B-RandomInit --interp-steps 100 \
+    --rollout-url http://127.0.0.1:30001 --arm last_adaptive --reward snips \
+    --out ckpt/jb-interpdef4-last_adaptive --steps 1000 --group 16 \
+    --prompts-per-step 4 --lr 3e-6 --max-new-tokens 160 --seed 17 \
+    --save-every 200
+```
+
+### 3b. First-generation arm (no interpolation, no definitions)
 
 ```bash
 python methods/sphere_grpo.py \

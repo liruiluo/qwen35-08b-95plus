@@ -219,6 +219,13 @@ def parse_markup(text):
     return calls
 
 
+def reward_snips_intent(response, gold):
+    """Intent-only ablation: 1.0 iff predicted intent matches gold.
+    Slot output is ignored entirely (response must still parse)."""
+    intent, _ = parse_pred_snips(response)
+    return 1.0 if intent == gold["intent"] else 0.0
+
+
 def reward_bfcl(response, gold_item):
     """1.0 iff the parsed call passes the official checker against the gold."""
     calls = parse_markup(response)
