@@ -15,7 +15,7 @@ JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次�
 | **SPHERE-Last-Adaptive（交付）** | **97.14%** | **2.86%** | **通过** |
 | SPHERE-All-Adaptive | 96.00% | 4.00% | 通过 |
 | SPHERE-Last-Fixed | 96.43% | 3.57% | 通过 |
-| GRPO 基线 | 95.43% | 4.57% | 通过 |
+| GRPO 基线 | 94.43% | 5.57% | — |
 
 ## 评测
 

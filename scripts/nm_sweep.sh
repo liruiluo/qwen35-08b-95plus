@@ -15,7 +15,7 @@ echo "model,step,intent_acc" > "$OUT"
 for m in "SPHERE-Last-Adaptive:jb-interpdef4s2000-last_adaptive" \
          "SPHERE-All-Adaptive:jb-interpdef4s2000-all_hidden_adaptive" \
          "SPHERE-Last-Fixed:jb-interpdef4s2000-last_fixed" \
-         "GRPO-baseline:jb-grpobase2-s2000"; do
+         "GRPO-baseline:jb-grpobase3-s2000"; do
   name=${m%%:*}
   tag=${m##*:}
   for ck in ckpt/$tag/step200 ckpt/$tag/step400 ckpt/$tag/step600 ckpt/$tag/step800 ckpt/$tag/step1000 ckpt/$tag/step1200 ckpt/$tag/step1400 ckpt/$tag/step1600 ckpt/$tag/step1800 ckpt/$tag; do
