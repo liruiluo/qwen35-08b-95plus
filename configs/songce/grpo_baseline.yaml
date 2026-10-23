@@ -1,7 +1,7 @@
 # GRPO 基线（大纲 4.2.2.2 基线算法）：关闭谱正则（rho=0）+ 基线学习率
 defaults:
   - base
-tag: jb-grpobase3-s2000
+tag: jb-grpobase4-s2000
 arm: last_adaptive
 rho: 0.0
-lr: 7.5e-8
+lr: 2.0e-7
