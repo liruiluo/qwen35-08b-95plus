@@ -46,7 +46,6 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from bfcl.ast_checker_official import ast_checker  # noqa: E402
 
 RHO = 1e-3
 
@@ -228,6 +227,7 @@ def reward_snips_intent(response, gold):
 
 def reward_bfcl(response, gold_item):
     """1.0 iff the parsed call passes the official checker against the gold."""
+    from bfcl.ast_checker_official import ast_checker
     calls = parse_markup(response)
     try:
         v = ast_checker(gold_item["function"], calls, gold_item["ground_truth"])
