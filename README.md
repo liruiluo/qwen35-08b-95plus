@@ -19,25 +19,35 @@ JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次�
 
 ## 评测
 
-`SNIPS/` 按测试大纲 4.2.2.4(3) 组织：
+按测试大纲 4.2.2.4(3) 的六个测试步骤组织：
 
-- `SNIPS/dataset/`：测试数据
-- `SNIPS/models/`：五个模型目录
-- `SNIPS/logs/`：各模型训练曲线
-- `SNIPS/scripts/evaluate.py`：评测入口
+1. 测试数据样例：`SNIPS/dataset/`（test 700 条，行格式见其 `README.md`）
+2. 模型：`SNIPS/models/` 下三个项目算法模型、基线模型与训练前模型
+   （权重放置与 sha256 核对见 `SNIPS/models/MANIFEST.md`）
+3. 训练曲线：`SNIPS/logs/` 各模型子目录（`curves.png` + `curves.csv` +
+   `training-log.jsonl`）
+4. 高效性测试（N<M）：各模型每 200 步存检查点、逐检查点评测 test 集
+   （`scripts/nm_sweep.sh`；数据 `SNIPS/logs/nm-sweep.csv`，曲线
+   `error-rate-curves.png`）。错误率首次不超过各阈值的训练步数：
+
+   | 错误率阈值 | SPHERE-Last-Adaptive | SPHERE-All-Adaptive | SPHERE-Last-Fixed | GRPO 基线 |
+   |---|---|---|---|---|
+   | 5%（判据线） | 200 | 200 | 200 | 400 |
+   | 4.8% | 200 | 200 | 600 | 1400 |
+   | 4.5% | 600 | 600 | 600 | 未达到 |
+   | 4% | 600 | 800 | 800 | 未达到 |
+
+   判据线 5% 上三算法 N=200 < 基线 M=400，高效性测试通过；更严的
+   4.8% 线三算法 200/200/600 步、基线 1400 步；4.5% 与 4% 线三算法
+   全部达到，基线 2000 步内未达到（全程最低错误率 4.71%）。
+5. 运行评测：`python SNIPS/scripts/evaluate.py`，遍历测试样本，
+   逐个输入上述 5 个模型并计算错误率
+6. 验收：训练前模型错误率为 100%；项目算法模型错误率不高于 5%
+   （实测 2.86% / 4.00% / 3.57%）
 
 环境：单张 GPU；Python ≥3.10；`pip install -r requirements.txt`
 （Linux 上 torch 需为 CUDA 版，按 pytorch.org 官方指引安装）。
-
-运行前将五个模型权重放入 `SNIPS/models/` 各子目录，格式见
-`SNIPS/models/MANIFEST.md`。
-
-```bash
-python SNIPS/scripts/evaluate.py             # 遍历测试样本 → 五模型 → 错误率
-```
-
-脚本自动拉起推理引擎、逐模型加载权重，输出各模型错误率与判据标注
-（训练前模型预期 100%，项目算法模型 ≤5% 为合格）。
+评测脚本自动拉起推理引擎、逐模型加载权重，输出各模型错误率与判据标注。
 
 ## 复现训练
 
