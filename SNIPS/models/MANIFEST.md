@@ -23,5 +23,17 @@
 随交付材料提供。放置到本目录各子目录，只需顶层文件，`step*/`
 中间检查点不必拷贝。
 
+各模型权重在组共享盘上，根目录在训练 pod 挂载为
+`/home/ai-jingyan-train/luolirui.1/qwen95-delivery/`，在跳板机 jd
+挂载为 `/mnt/amg-nfs/luolirui.1/qwen95-delivery/`：
+
+| 模型 | 共享盘路径 |
+|---|---|
+| RandomInit | `models/Qwen3.5-0.8B-RandomInit` |
+| GRPO-baseline | `ckpt/jb-grpobase6-s2000` |
+| SPHERE-Last-Adaptive | `ckpt/jb-interpdef4s2000-last_adaptive` |
+| SPHERE-All-Adaptive | `ckpt/jb-interpdef4s2000-all_hidden_adaptive` |
+| SPHERE-Last-Fixed | `ckpt/jb-interpdef4s2000-last_fixed` |
+
 RandomInit 由 `scripts/make_random_init.py` 以 seed 17 从
 Qwen3.5-0.8B 随机重置生成，可离线复现。
