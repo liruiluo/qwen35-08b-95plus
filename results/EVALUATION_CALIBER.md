@@ -67,8 +67,7 @@ span-exact micro-F1 在本仓库作为附加证据线保留，不作为达标线
 每个交付数字 = **一条命令从 base 到最终数**：
 
 - 固定随机种子（seed 17）、固定步数（2000）、固定超参（group 16、
-  prompts-per-step 4、lr 3e-6（三算法；GRPO 基线为 1.5e-7）、
-  max-new-tokens 160、save-every 200，
+  prompts-per-step 4、max-new-tokens 160、save-every 200，
   其余取默认值：name-credit 0.25、gen-temp 1.0、microbatch 16）；
 - 无续训/补训，无按中间成绩的任何修补，无按中间评测挑 checkpoint；
 - 评测与训练同渲染协议（同一 chat 模板与生成参数，由
