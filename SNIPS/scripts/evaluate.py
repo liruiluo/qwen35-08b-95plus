@@ -11,15 +11,15 @@
   python SNIPS/scripts/evaluate.py --limit 20          # 冒烟（前 20 条）
 
 前置条件：
-  - SNIPS/models/<名称>/ 下已放置模型权重（见 SNIPS/models/MANIFEST.md
-    的 sha256 与获取方式；未放置的模型会被跳过并标注 PENDING）；
+  - SNIPS/models/<名称>/ 下已放置模型权重，放置方式见
+    SNIPS/models/MANIFEST.md。未放置的模型会被跳过并标注 PENDING。
   - GPU 环境装有 torch / transformers / sglang（安装见仓库根 README
     「评测」一节与 requirements.txt）。引擎未启动时本脚本会自动拉起。
 
 判定（测试大纲 4.2.2.5）：
-  A = 训练前模型的错误率（预期 100%）；B = 各算法训练后模型的错误率。
-  合格判据 B < A×5% = 5%；高效性判据：错误率达到 5% 所需训练步数
-  N（SPHERE 各算法）< M（GRPO 基线），见 SNIPS/logs/ 的训练曲线。
+  训练前模型的错误率预期为 100%，各算法训练后模型的错误率不高于 5%。
+  高效性判据为错误率达到 5% 所需训练步数，SPHERE 各算法少于 GRPO
+  基线，训练曲线见 SNIPS/logs/。
 """
 import argparse
 import os

@@ -20,22 +20,8 @@
 ## 权重获取
 
 权重为 HF 格式目录，含 `model.safetensors`、config 与 tokenizer，
-随交付材料提供。按下方 sha256 清单核对后放置到本目录各子目录，
-只需顶层文件，`step*/` 中间检查点不必拷贝：
-
-```bash
-sha256sum SNIPS/models/<模型名>/model.safetensors   # macOS: shasum -a 256 <同路径>
-```
-
-## sha256 清单
-
-| 模型 | model.safetensors sha256 |
-|---|---|
-| RandomInit | `aa430a35da2d2855f8059cb45a7f28c2753f94ccb6ff363ea053e76922b31130` |
-| SPHERE-Last-Adaptive | `d24f3ff584704c8f5ba8042163eb69efdf92cdff76b0be2157bb621357e3c006` |
-| SPHERE-All-Adaptive | `118b1a7dac62e9ac85b662a871c2301535ef744482f2d579facf5b51abefcd68` |
-| SPHERE-Last-Fixed | `4cd370e9ec7d5841c488fbb7e9e9c7948c91ac595342a59f946fdc6846b6c163` |
-| GRPO-baseline | `f1ded325e072c24358c233f6c96d6461d0b36c04678e32bc51a6eeed57eaeaf0` |
+随交付材料提供。放置到本目录各子目录，只需顶层文件，`step*/`
+中间检查点不必拷贝。
 
 RandomInit 由 `scripts/make_random_init.py` 以 seed 17 从
 Qwen3.5-0.8B 随机重置生成，可离线复现。
