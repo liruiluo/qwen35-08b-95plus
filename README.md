@@ -26,7 +26,7 @@ JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次�
    （权重放置见 `SNIPS/models/MANIFEST.md`）
 3. 训练曲线：`SNIPS/logs/` 各模型子目录（`curves.png` + `curves.csv` +
    `training-log.jsonl`）
-4. 高效性测试（N<M）：各模型每 200 步存检查点、逐检查点评测 test 集
+4. 高效性测试：各模型每 200 步存检查点、逐检查点评测 test 集
    （`scripts/nm_sweep.sh`；数据 `SNIPS/logs/nm-sweep.csv`，曲线
    `error-rate-curves.png`）。错误率首次不超过各阈值的训练步数：
 
@@ -37,7 +37,8 @@ JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次�
    | 4.5% | 600 | 600 | 600 | 未达到 |
    | 4% | 600 | 800 | 800 | 未达到 |
 
-   判据线 5% 上三算法 N=200 < 基线 M=400，高效性测试通过；更严的
+   判据线 5% 上三算法 200 步达到、基线 400 步——项目算法所需训练
+   步数少于基线，高效性测试通过；更严的
    4.8% 线三算法 200/200/600 步、基线 1400 步；4.5% 与 4% 线三算法
    全部达到，基线 2000 步内未达到（全程最低错误率 4.71%）。
 5. 运行评测：`python SNIPS/scripts/evaluate.py`，遍历测试样本，

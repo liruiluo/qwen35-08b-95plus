@@ -1,8 +1,8 @@
 #!/bin/bash
-# Error-rate vs. training-step sweep over saved checkpoints (N<M efficiency
-# evidence). For each model and each 200-step checkpoint: load the weights
-# into the running engine, evaluate on the test set, append (model, step,
-# INTENT_ACC) to results/nm-sweep.csv.
+# Error-rate vs. training-step sweep over saved checkpoints (efficiency
+# criterion evidence). For each model and each 200-step checkpoint: load the
+# weights into the running engine, evaluate on the test set, append (model,
+# step, INTENT_ACC) to results/nm-sweep.csv.
 set -u
 cd /root/train95
 PY=/root/h3venv/bin/python
