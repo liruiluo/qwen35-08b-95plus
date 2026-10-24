@@ -1,4 +1,4 @@
-# SPHERE-Last-Fixed · 交付配方（与 last_adaptive 唯一变量 = arm）
+# SPHERE-Last-Fixed
 defaults:
   - base
 tag: jb-interpdef4s2000-last_fixed

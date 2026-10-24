@@ -1,4 +1,4 @@
-# GRPO 基线（大纲 4.2.2.2 基线算法）：关闭谱正则（rho=0）+ 基线学习率
+# GRPO 基线（大纲 4.2.2.2 基线算法）
 defaults:
   - base
 tag: jb-grpobase6-s2000

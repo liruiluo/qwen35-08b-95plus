@@ -1,5 +1,3 @@
-# 交付配方共享字段——各配置与基线的唯一变量 = arm / rho / lr（见各配置文件）。
-# 路径为训练服务器布局，本机复现时按环境修改。
 data: snips/data-jbdef4/train.jsonl
 base: /root/models/Qwen3.5-0.8B
 interp_base: /root/models/Qwen3.5-0.8B-RandomInit
