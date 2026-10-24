@@ -69,14 +69,14 @@ python methods/train_hydra.py -cn grpo_baseline   # GRPO 基线
 训练算法为 **GRPO**（组相对策略优化）：对每个提示采样 16 条输出，以
 组内相对优势替代价值网络估计。在此之上叠加 **SPHERE 谱塑性正则**
 （arXiv:2605.04712）：对 Transformer MLP 层输入的 Gram 矩阵施加
-Parseval 型正则，强度固定为 GRPO 梯度的 0.1%（rho=1e-3）。
+Parseval 型正则。
 
 四个训练配置：
 
 - SPHERE-Last-Adaptive：仅最后一层，自适应 α
 - SPHERE-All-Adaptive：全部层
 - SPHERE-Last-Fixed：仅最后一层，固定 α=1
-- GRPO 基线：关闭谱正则项（rho=0）
+- GRPO 基线：关闭谱正则项
 
 评测采用 JointBERT 标准划分；划分依据与评测口径见
 `results/EVALUATION_CALIBER.md`。
