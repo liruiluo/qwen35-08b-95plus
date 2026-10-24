@@ -2,7 +2,7 @@
 
 | 目录 | 大纲角色 | 状态 | test 错误率（实测） |
 |---|---|---|---|
-| `RandomInit/` | 训练前模型（判据 A） | ✅ 权重随材料交付 | **100%**（700/700 不可解析，意图准确率 0.00%） |
+| `RandomInit/` | 训练前模型 | ✅ 权重随材料交付 | **100%**（700/700 不可解析，意图准确率 0.00%） |
 | `GRPO-baseline/` | 基线算法模型（GRPO） | ✅ 权重随材料交付 | **4.71%**（意图准确率 95.29%） |
 | `SPHERE-Last-Adaptive/` | 项目算法 1 | ✅ 权重随材料交付 | **2.86%**（意图准确率 97.14%） |
 | `SPHERE-All-Adaptive/` | 项目算法 2 | ✅ 权重随材料交付 | **4.00%**（意图准确率 96.00%） |
@@ -19,9 +19,9 @@
 
 ## 权重获取
 
-权重为 HF 格式目录（`model.safetensors` + config + tokenizer），随
-交付材料提供；按下方 sha256 清单核对后放置到本目录各子目录（只需
-顶层文件，`step*/` 中间检查点不必拷贝）：
+权重为 HF 格式目录，含 `model.safetensors`、config 与 tokenizer，
+随交付材料提供。按下方 sha256 清单核对后放置到本目录各子目录，
+只需顶层文件，`step*/` 中间检查点不必拷贝：
 
 ```bash
 sha256sum SNIPS/models/<模型名>/model.safetensors   # macOS: shasum -a 256 <同路径>
@@ -37,5 +37,5 @@ sha256sum SNIPS/models/<模型名>/model.safetensors   # macOS: shasum -a 256 <�
 | SPHERE-Last-Fixed | `4cd370e9ec7d5841c488fbb7e9e9c7948c91ac595342a59f946fdc6846b6c163` |
 | GRPO-baseline | `f1ded325e072c24358c233f6c96d6461d0b36c04678e32bc51a6eeed57eaeaf0` |
 
-RandomInit 由 `scripts/make_random_init.py`（seed 17）从
+RandomInit 由 `scripts/make_random_init.py` 以 seed 17 从
 Qwen3.5-0.8B 随机重置生成，可离线复现。
