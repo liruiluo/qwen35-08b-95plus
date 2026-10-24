@@ -3,6 +3,7 @@
 每个模型一个子目录，含 `curves.png` 训练曲线图 +
 `curves.csv` 逐 step 数据（生成脚本 `scripts/plot_songce_curves.py`）；
 `curves-all.png` 为全部已训模型的对比总图；
+`error-rate-curves.png` 为 test 错误率-训练步数曲线（N<M 高效性判据的可视化）；
 `evaluate.py` 的汇总输出写在本目录 `evaluate-summary.txt`。
 
 | 子目录 | 内容 | 说明 |
@@ -18,7 +19,8 @@ RandomInit（训练前模型）无训练曲线，不建子目录；零样本错�
 
 大纲 4.2.2.4(3) 第 4 步要求"错误率达到 5% 所需训练迭代次数"的对比。
 各模型训练时每 200 步保存检查点，逐检查点加载权重后跑一次 test 集评测
-（`scripts/nm_sweep.sh`，数据 `nm-sweep.csv`），得到错误率-步数曲线。
+（`scripts/nm_sweep.sh`，数据 `nm-sweep.csv`，曲线图 `error-rate-curves.png`），
+得到错误率-步数曲线。
 错误率首次不超过各阈值的训练步数：
 
 | 错误率阈值 | SPHERE-Last-Adaptive | SPHERE-All-Adaptive | SPHERE-Last-Fixed | GRPO 基线 |
