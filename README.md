@@ -83,9 +83,10 @@ Parseval 型正则。
 
 ## 数据与引用
 
-- SNIPS 语料：Coucke et al., arXiv:1805.10190
-- 划分：JointBERT（monologg/JointBERT）
-- GRPO：DeepSeekMath, arXiv:2402.03300
+- SNIPS 语料：Coucke et al., 2018（arXiv:1805.10190）
+- 划分：Chen et al., 2019（JointBERT, arXiv:1902.10909；
+  数据文件 monologg/JointBERT）
+- GRPO：Shao et al., 2024（DeepSeekMath, arXiv:2402.03300）
 - SPHERE：Lirui Luo et al. Proceedings of the 43rd International
   Conference on Machine Learning (ICML), 2026（arXiv:2605.04712）
 

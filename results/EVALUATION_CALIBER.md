@@ -8,7 +8,7 @@
 
 测试大纲 4.2.2.2 将本场景称为**指令认知识别**（SNIPS 数据集），
 其评价指标为 7 类**意图分类**准确率。这与
-[LLM2LLM (ACL Findings 2024)](https://arxiv.org/abs/2403.15042) 在 SNIPS
+[LLM2LLM (Findings of ACL 2024)](https://aclanthology.org/2024.findings-acl.388/) 在 SNIPS
 上的任务范围一致：LLM2LLM 同样只做意图分类，不做槽位填充。槽位
 span-exact micro-F1 在本仓库作为附加证据线保留，不作为达标线。
 
@@ -19,7 +19,8 @@ span-exact micro-F1 在本仓库作为附加证据线保留，不作为达标线
 
 依据链：
 
-1. **LLM2LLM 报的是 test 准确率**。论文原文（arXiv 2403.15042）：
+1. **LLM2LLM 报的是 test 准确率**。论文原文（Findings of ACL 2024,
+   pp. 6498–6526）：
    > "To measure the efficacy of LLM2LLM, we fine-tune the student model
    > using samples of different sizes from each dataset and evaluate on
    > the validation sets"
