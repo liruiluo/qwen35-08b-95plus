@@ -86,7 +86,8 @@ Parseval 型正则。
 - SNIPS 语料：Coucke et al., arXiv:1805.10190
 - 划分：JointBERT（monologg/JointBERT）
 - GRPO：DeepSeekMath, arXiv:2402.03300
-- SPHERE：Lirui Luo et al., ICML 2026（arXiv:2605.04712）
+- SPHERE：Lirui Luo et al. Proceedings of the 43rd International
+  Conference on Machine Learning (ICML), 2026（arXiv:2605.04712）
 
 ## License
 
