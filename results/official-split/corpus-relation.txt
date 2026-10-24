@@ -1,6 +1,0 @@
-JB-train ∩ official-train(13784): exact(casefold)=8595, intent-label agreement=8595/8595 (100.0%)
-JB-train ∩ official-validate(700): exact(casefold)=13, intent-label agreement=13/13 (100.0%)
-JB-dev ∩ official-train(13784): exact(casefold)=12, intent-label agreement=12/12 (100.0%)
-JB-dev ∩ official-validate(700): exact(casefold)=352, intent-label agreement=352/352 (100.0%)
-JB-test ∩ official-train(13784): exact(casefold)=464, intent-label agreement=464/464 (100.0%)
-JB-test ∩ official-validate(700): exact(casefold)=1, intent-label agreement=1/1 (100.0%)

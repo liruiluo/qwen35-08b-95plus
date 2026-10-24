@@ -1,5 +1,0 @@
-model=GRPO-baseline
-n=700 wall=19.3s
-INTENT_ACC=96.00%
-SLOT_P=25.23% SLOT_R=16.67% SLOT_F1=20.07%
-TP=299 FP=886 FN=1495 unparsable=0

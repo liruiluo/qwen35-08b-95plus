@@ -25,7 +25,4 @@ https://github.com/snipsco/nlu-benchmark）的 **JointBERT 标准划分**
 
 SNIPS 官方仓库不提供 test 划分，且官方 train 文件（13,784 条）与文献标准
 test 集重叠 464/700——在官方 train 上训练再报 test 数等于 train-on-test。
-完整实测与论证见仓库根 `results/EVALUATION_CALIBER.md` 与
-`results/official-split/corpus-relation.txt`。官方划分的附加结果
-（train 13,784 / validate 700）保留在 `results/official-split/`，
-不作为主结果。
+（重叠关系可由 SNIPS 官方仓库与 monologg/JointBERT 划分文件独立复核。）

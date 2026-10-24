@@ -1,5 +1,0 @@
-model=SPHERE-All-Adaptive
-n=700 wall=15.6s
-INTENT_ACC=95.29%
-SLOT_P=73.31% SLOT_R=53.41% SLOT_F1=61.80%
-TP=956 FP=348 FN=834 unparsable=0

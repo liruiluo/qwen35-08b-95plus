@@ -78,8 +78,7 @@ Parseval 型正则。
 - SPHERE-Last-Fixed：仅最后一层，固定 α=1
 - GRPO 基线：关闭谱正则项
 
-评测采用 JointBERT 标准划分；划分依据与评测口径见
-`results/EVALUATION_CALIBER.md`。
+评测采用 JointBERT 标准划分（划分依据见 `SNIPS/dataset/README.md`）。
 
 ## 数据与引用
 
