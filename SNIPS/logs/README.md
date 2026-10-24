@@ -6,6 +6,8 @@
 步数曲线，是高效性判据的可视化。`evaluate.py` 的汇总输出写在本目录
 `evaluate-summary.txt`。
 
+![全部模型训练曲线对比](curves-all.png)
+
 | 子目录 | 内容 | 说明 |
 |---|---|---|
 | `SPHERE-Last-Adaptive/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 项目算法 1 |
@@ -14,6 +16,16 @@
 | `GRPO-baseline/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 基线模型 |
 
 RandomInit 为训练前模型，无训练曲线，不建子目录，零样本错误率 100%。
+
+各模型训练曲线：
+
+![SPHERE-Last-Adaptive 训练曲线](SPHERE-Last-Adaptive/curves.png)
+
+![SPHERE-All-Adaptive 训练曲线](SPHERE-All-Adaptive/curves.png)
+
+![SPHERE-Last-Fixed 训练曲线](SPHERE-Last-Fixed/curves.png)
+
+![GRPO-baseline 训练曲线](GRPO-baseline/curves.png)
 
 ## 高效性判据
 
@@ -34,6 +46,8 @@ RandomInit 为训练前模型，无训练曲线，不建子目录，零样本错
 基线到 400 步才达到，项目算法所需训练步数少于基线。更严的 4.8% 线上
 三算法分别为 200、200、600 步，基线需要 1400 步。4.5% 与 4% 线三
 算法全部达到，基线在整个 2000 步训练中均未达到，最低错误率 4.71%。
+
+![test 错误率-训练步数曲线](error-rate-curves.png)
 
 ## curves.csv 字段
 
