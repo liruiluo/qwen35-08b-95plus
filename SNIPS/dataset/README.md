@@ -8,7 +8,7 @@ https://github.com/snipsco/nlu-benchmark）的 **JointBERT 标准划分**
 | 文件 | 条数 | 用途 |
 |---|---|---|
 | `train.jsonl` | 13,084 | 训练语料（测试大纲：训练数据） |
-| `dev.jsonl` | 700 | 开发集（调参诊断用，**从不用于 checkpoint 挑选**） |
+| `dev.jsonl` | 700 | 开发集 |
 | `test.jsonl` | 700 | **测试样本**：`SNIPS/scripts/evaluate.py` 的遍历对象 |
 
 行格式（chat messages，第三条消息为标准答案）：
