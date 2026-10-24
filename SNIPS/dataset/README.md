@@ -15,7 +15,7 @@ https://github.com/snipsco/nlu-benchmark）的 **JointBERT 标准划分**
 
 ```json
 {"messages": [
-  {"role": "system", "content": "<任务说明 + 7 类意图定义（训练集统计归纳）>"},
+  {"role": "system", "content": "<任务说明 + 7 类意图定义>"},
   {"role": "user",   "content": "play something from the album erase by britney spears"},
   {"role": "assistant", "content": "{\"intent\": \"PlayMusic\", \"slots\": [...]}"}
 ]}
