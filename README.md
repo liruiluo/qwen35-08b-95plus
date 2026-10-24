@@ -20,14 +20,43 @@ SNIPS 指令认知识别任务，评价指标为 7 类意图分类准确率。
 
 ## 评测
 
-按测试大纲 4.2.2.4(3) 的六个测试步骤组织：
+按测试大纲 4.2.2.4(3) 的六个测试步骤组织。
 
-1. 测试数据样例：`SNIPS/dataset/`，test 共 700 条，行格式见其 `README.md`
-2. 模型：`SNIPS/models/` 下三个项目算法模型、基线模型与训练前模型，
-   权重放置见 `SNIPS/models/MANIFEST.md`
-3. 训练曲线：`SNIPS/logs/` 各模型子目录，含 `curves.png`、`curves.csv`
-   与 `training-log.jsonl`
-4. 高效性测试：各模型每 200 步存检查点，逐检查点评测 test 集，由
+环境为单张 GPU，Python 3.10 及以上，先 `pip install -r requirements.txt`
+完成安装。Linux 上 torch 需为 CUDA 版，按 pytorch.org 官方指引安装。
+
+运行前先把五个模型权重从共享盘放入 `SNIPS/models/` 各子目录。共享盘
+根目录在训练 pod 挂载为
+`/home/ai-jingyan-train/luolirui.1/qwen95-delivery/`，在跳板机 jd 挂载为
+`/mnt/amg-nfs/luolirui.1/qwen95-delivery/`，各模型路径对照见
+`SNIPS/models/MANIFEST.md`。在挂载共享盘的机器上、仓库根目录下执行：
+
+```bash
+D=/home/ai-jingyan-train/luolirui.1/qwen95-delivery   # jd 上改为 /mnt/amg-nfs/luolirui.1/qwen95-delivery
+rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/models/Qwen3.5-0.8B-RandomInit/ SNIPS/models/RandomInit/
+rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/ckpt/jb-grpobase6-s2000/ SNIPS/models/GRPO-baseline/
+rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/ckpt/jb-interpdef4s2000-last_adaptive/ SNIPS/models/SPHERE-Last-Adaptive/
+rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/ckpt/jb-interpdef4s2000-all_hidden_adaptive/ SNIPS/models/SPHERE-All-Adaptive/
+rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/ckpt/jb-interpdef4s2000-last_fixed/ SNIPS/models/SPHERE-Last-Fixed/
+```
+
+1. 测试数据样例，`SNIPS/dataset/` 下 test 共 700 条，行格式见其
+   `README.md`：
+
+   ```bash
+   head -n 1 SNIPS/dataset/test.jsonl
+   ```
+
+2. 模型，`SNIPS/models/` 下三个项目算法模型、基线模型与训练前模型：
+
+   ```bash
+   ls SNIPS/models/
+   ```
+
+3. 训练曲线，`SNIPS/logs/README.md` 内嵌各模型训练曲线、对比总图与
+   错误率-步数曲线，各模型子目录含 `curves.png`、`curves.csv` 与
+   `training-log.jsonl`
+4. 高效性测试，各模型每 200 步存检查点，逐检查点评测 test 集，由
    `scripts/nm_sweep.sh` 生成 `SNIPS/logs/nm-sweep.csv` 与曲线图
    `error-rate-curves.png`。错误率首次不超过各阈值的训练步数：
 
@@ -44,14 +73,24 @@ SNIPS 指令认知识别任务，评价指标为 7 类意图分类准确率。
    基线 2000 步内未达到，其最低错误率为 4.71%。
 
    ![test 错误率-训练步数曲线](SNIPS/logs/error-rate-curves.png)
-5. 运行评测：`python SNIPS/scripts/evaluate.py`，遍历测试样本，
-   逐个输入上述 5 个模型并计算错误率
-6. 验收：训练前模型错误率为 100%。项目算法模型错误率不高于 5%，
-   三个算法实测 2.86%、4.00% 与 3.57%
 
-环境为单张 GPU，Python 3.10 及以上，先 `pip install -r requirements.txt`
-完成安装。Linux 上 torch 需为 CUDA 版，按 pytorch.org 官方指引安装。
-评测脚本自动拉起推理引擎，逐模型加载权重，输出各模型错误率与判据标注。
+   逐检查点的原始评测数据：
+
+   ```bash
+   cat SNIPS/logs/nm-sweep.csv
+   ```
+
+5. 运行评测，遍历测试样本，逐个输入上述 5 个模型并计算错误率：
+
+   ```bash
+   python SNIPS/scripts/evaluate.py
+   ```
+
+   评测脚本自动拉起推理引擎，逐模型加载权重，输出各模型错误率与
+   判据标注。
+
+6. 验收，训练前模型错误率为 100%。项目算法模型错误率不高于 5%，
+   三个算法实测 2.86%、4.00% 与 3.57%
 
 ## 复现训练
 

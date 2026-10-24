@@ -20,8 +20,8 @@
 ## 权重获取
 
 权重为 HF 格式目录，含 `model.safetensors`、config 与 tokenizer，
-随交付材料提供。放置到本目录各子目录，只需顶层文件，`step*/`
-中间检查点不必拷贝。
+随交付材料提供。从共享盘拷贝到本目录各子目录的命令见仓库根
+README「评测」一节。
 
 各模型权重在组共享盘上，根目录在训练 pod 挂载为
 `/home/ai-jingyan-train/luolirui.1/qwen95-delivery/`，在跳板机 jd
