@@ -23,7 +23,7 @@ JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次�
 
 1. 测试数据样例：`SNIPS/dataset/`（test 700 条，行格式见其 `README.md`）
 2. 模型：`SNIPS/models/` 下三个项目算法模型、基线模型与训练前模型
-   （权重放置与 sha256 核对见 `SNIPS/models/MANIFEST.md`）
+   （权重放置见 `SNIPS/models/MANIFEST.md`）
 3. 训练曲线：`SNIPS/logs/` 各模型子目录（`curves.png` + `curves.csv` +
    `training-log.jsonl`）
 4. 高效性测试（N<M）：各模型每 200 步存检查点、逐检查点评测 test 集
