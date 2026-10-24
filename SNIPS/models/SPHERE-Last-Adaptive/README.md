@@ -1,4 +1,4 @@
-# SPHERE-Last-Adaptive（交付）
+# SPHERE-Last-Adaptive
 
 - 训练配方：强化学习（GRPO + SPHERE 谱塑性正则）+ 意图定义提示。
 - 结果：**test 意图准确率 97.14%，错误率 2.86%（判据 B≤5% 合格）**。

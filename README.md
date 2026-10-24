@@ -12,7 +12,7 @@ JointBERT 标准划分（Train 13,084 / Dev 700 / Test 700），test 集单次�
 | 模型 | test 准确率 | 错误率 | 大纲判据（B < A×5%，即 ≤5%） |
 |---|---|---|---|
 | 训练前模型（随机初始化，seed 17，A） | 0.00% | 100% | — |
-| **SPHERE-Last-Adaptive（交付）** | **97.14%** | **2.86%** | **通过** |
+| **SPHERE-Last-Adaptive** | **97.14%** | **2.86%** | **通过** |
 | SPHERE-All-Adaptive | 96.00% | 4.00% | 通过 |
 | SPHERE-Last-Fixed | 96.43% | 3.57% | 通过 |
 | GRPO 基线 | 95.29% | 4.71% | — |
@@ -55,7 +55,7 @@ python scripts/make_random_init.py base/Qwen3.5-0.8B <随机初始化目录>
 bash engine/launch_engine.sh <base模型> 30001
 
 # 4) 训练（每个算法一个 hydra 配置，见 configs/songce/）
-python methods/train_hydra.py -cn last_adaptive   # SPHERE-Last-Adaptive（交付）
+python methods/train_hydra.py -cn last_adaptive   # SPHERE-Last-Adaptive
 python methods/train_hydra.py -cn all_adaptive    # SPHERE-All-Adaptive
 python methods/train_hydra.py -cn last_fixed      # SPHERE-Last-Fixed
 python methods/train_hydra.py -cn grpo_baseline   # GRPO 基线

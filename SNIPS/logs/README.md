@@ -8,9 +8,9 @@
 
 | 子目录 | 内容 | 说明 |
 |---|---|---|
-| `SPHERE-Last-Adaptive/` | `curves.png` + `curves.csv`（step, mean_reward, roll50）+ `training-log.jsonl`（逐步训练证据） | 交付模型，2000 步 |
-| `SPHERE-All-Adaptive/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 统一配方重训 |
-| `SPHERE-Last-Fixed/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 统一配方重训 |
+| `SPHERE-Last-Adaptive/` | `curves.png` + `curves.csv`（step, mean_reward, roll50）+ `training-log.jsonl`（逐步训练证据） | 项目算法 1 |
+| `SPHERE-All-Adaptive/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 项目算法 2 |
+| `SPHERE-Last-Fixed/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 项目算法 3 |
 | `GRPO-baseline/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 基线模型 |
 
 RandomInit（训练前模型）无训练曲线，不建子目录；零样本错误率 100%。
