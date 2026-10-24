@@ -39,20 +39,13 @@ Usage (SNIPS):
       --arm last_adaptive --reward snips \
       --out ckpt/snips-last-adaptive --steps 400
 """
-import argparse, base64, json, math, os, random, re, sys, threading, time
+import argparse, base64, json, math, os, random, threading, time
 import urllib.request
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
 RHO = 1e-3
-
-BFCL_SYSTEM = ("You are an expert in composing functions. You are given a question and a set of possible functions. "
-               "Based on the question, you will need to make one or more function/tool calls to achieve the purpose. "
-               "If none of the functions can be used, point it out. If the given question lacks the parameters required by the function, also point it out. "
-               "You should only return the function calls in your response and nothing else.")
 
 
 # ------------------------------------------------------------------ sglang IO
@@ -197,43 +190,11 @@ def reward_snips(response, gold, name_credit=0.25):
     return 0.5 * i_ok + 0.5 * f1
 
 
-def parse_markup(text):
-    import ast as _a
-    calls = []
-    if not text:
-        return calls
-    for fm in re.finditer(r"<function=([\w.]+)>(.*?)</function>", text, re.S):
-        name, body = fm.group(1), fm.group(2)
-        params = {}
-        for pm in re.finditer(r"<parameter=([\w.]+)>(.*?)</parameter>", body, re.S):
-            k, v = pm.group(1), pm.group(2).strip()
-            try:
-                params[k] = json.loads(v)
-            except Exception:
-                try:
-                    params[k] = _a.literal_eval(v)
-                except Exception:
-                    params[k] = v
-        calls.append({name: params})
-    return calls
-
-
 def reward_snips_intent(response, gold):
     """Intent-only ablation: 1.0 iff predicted intent matches gold.
     Slot output is ignored entirely (response must still parse)."""
     intent, _ = parse_pred_snips(response)
     return 1.0 if intent == gold["intent"] else 0.0
-
-
-def reward_bfcl(response, gold_item):
-    """1.0 iff the parsed call passes the official checker against the gold."""
-    from bfcl.ast_checker_official import ast_checker
-    calls = parse_markup(response)
-    try:
-        v = ast_checker(gold_item["function"], calls, gold_item["ground_truth"])
-        return 1.0 if v["valid"] else 0.0
-    except Exception:
-        return 0.0
 
 
 # ------------------------------------------------------------------ SPHERE
@@ -293,18 +254,6 @@ def sphere_grad_layer(phi_rows, alpha_mode):
 
 # ------------------------------------------------------------------ data
 
-def to_oai_tool(fd):
-    props = dict(fd["parameters"]["properties"])
-    req = fd["parameters"].get("required", [])
-    schema = {"type": "object", "properties": {}, "required": req}
-    for k, v in props.items():
-        schema["properties"][k] = {"type": v.get("type", "string"),
-                                   "description": v.get("description", "")}
-    return {"type": "function",
-            "function": {"name": fd["name"].replace(".", "_"),
-                         "description": fd.get("description", ""),
-                         "parameters": schema}}
-
 
 def load_rows(path, reward_kind):
     rows = []
@@ -314,18 +263,12 @@ def load_rows(path, reward_kind):
             if not line:
                 continue
             d = json.loads(line)
-            if reward_kind == "snips":
-                # train.jsonl rows are [system, user, assistant-gold]; the
-                # rollout prompt MUST exclude the assistant turn (gold leak)
-                rows.append({"messages": d["messages"][:-1], "tools": None,
-                             "gold": json.loads(d["messages"][2]["content"]),
-                             "gold_item": None})
-            else:
-                rows.append({"messages": [
-                    {"role": "system", "content": BFCL_SYSTEM},
-                    {"role": "user", "content": d["question"]}],
-                    "tools": [to_oai_tool(d["function"][0])],
-                    "gold": None, "gold_item": d})
+            if reward_kind != "snips":
+                raise ValueError(f"unsupported reward kind: {reward_kind}")
+            # train.jsonl rows are [system, user, assistant-gold]; the
+            # rollout prompt MUST exclude the assistant turn (gold leak)
+            rows.append({"messages": d["messages"][:-1], "tools": None,
+                         "gold": json.loads(d["messages"][2]["content"])})
     return rows
 
 
@@ -339,7 +282,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--arm", required=True,
                     choices=["last_adaptive", "all_hidden_adaptive", "last_fixed"])
-    ap.add_argument("--reward", required=True, choices=["snips", "bfcl"])
+    ap.add_argument("--reward", required=True, choices=["snips"])
     ap.add_argument("--steps", type=int, default=400)
     ap.add_argument("--group", type=int, default=8)
     ap.add_argument("--prompts-per-step", type=int, default=16)
@@ -431,11 +374,8 @@ def main():
             for g in range(G):
                 text = outs[pi][g]
                 r = batch_rows[pi]
-                if args.reward == "snips":
-                    rewards.append(reward_snips(text, r["gold"],
-                                                args.name_credit))
-                else:
-                    rewards.append(reward_bfcl(text, r["gold_item"]))
+                rewards.append(reward_snips(text, r["gold"],
+                                            args.name_credit))
                 resp_ids = tok(text, add_special_tokens=False)["input_ids"]
                 seqs.append((prompt_ids[pi] + resp_ids, plens[pi]))
         rewards = torch.tensor(rewards, dtype=torch.float32).cuda()

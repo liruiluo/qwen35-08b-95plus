@@ -36,7 +36,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from methods.sphere_grpo import (SphereHook, load_rows, push_weights,  # noqa: E402
-                                  reward_bfcl, reward_snips, reward_snips_intent, rollout,
+                                  reward_snips, reward_snips_intent, rollout,
                                   sphere_grad_layer, RHO)
 
 
@@ -67,7 +67,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--arm", required=True,
                     choices=["last_adaptive", "all_hidden_adaptive", "last_fixed"])
-    ap.add_argument("--reward", required=True, choices=["snips", "snips_intent", "bfcl"])
+    ap.add_argument("--reward", required=True, choices=["snips", "snips_intent"])
     ap.add_argument("--steps", type=int, default=3000)
     ap.add_argument("--group", type=int, default=16)
     ap.add_argument("--prompts-per-step", type=int, default=4)
@@ -111,7 +111,7 @@ def main():
     else:
         target_layers, alpha_mode = [n_layers - 1], 1.0
 
-    rows = load_rows(args.data, "snips" if args.reward.startswith("snips") else args.reward)
+    rows = load_rows(args.data, "snips")
     if args.train_pool:
         rng = random.Random(1000 + args.seed)
         rows = rng.sample(rows, min(args.train_pool, len(rows)))
@@ -171,10 +171,8 @@ def main():
                 if args.reward == "snips":
                     rewards.append(reward_snips(text, r["gold"],
                                                 args.name_credit))
-                elif args.reward == "snips_intent":
-                    rewards.append(reward_snips_intent(text, r["gold"]))
                 else:
-                    rewards.append(reward_bfcl(text, r["gold_item"]))
+                    rewards.append(reward_snips_intent(text, r["gold"]))
                 resp_ids = tok(text, add_special_tokens=False)["input_ids"]
                 seqs.append((prompt_ids[pi] + resp_ids, plens[pi]))
         rewards = torch.tensor(rewards, dtype=torch.float32).cuda()
