@@ -68,7 +68,7 @@ python methods/train_hydra.py -cn grpo_baseline   # GRPO 基线
 
 训练算法为 **GRPO**（组相对策略优化）：对每个提示采样 16 条输出，以
 组内相对优势替代价值网络估计。在此之上叠加 **SPHERE 谱塑性正则**
-（arXiv:2605.04712）：对 Transformer MLP 层输入的 Gram 矩阵施加
+（ICML 2026）：对 Transformer MLP 层输入的 Gram 矩阵施加
 Parseval 型正则。
 
 四个训练配置：
@@ -86,7 +86,7 @@ Parseval 型正则。
 - SNIPS 语料：Coucke et al., arXiv:1805.10190
 - 划分：JointBERT（monologg/JointBERT）
 - GRPO：DeepSeekMath, arXiv:2402.03300
-- SPHERE：arXiv:2605.04712（ICML 2026）
+- SPHERE：Lirui Luo et al., ICML 2026（arXiv:2605.04712）
 
 ## License
 
