@@ -74,7 +74,7 @@ span-exact micro-F1 在本仓库作为附加证据线保留，不作为达标线
   common/bproto.py 统一实现）。
 
 完整命令见 README「复现训练」一节；
-`scripts/run_songce_*.sh` 是四个模型（三算法 + 基线）串行训练的原始脚本
+`scripts/run_songce_*.sh` 是各模型在训练服务器上的原始启动脚本
 （训练服务器布局）。
 
 ## 5. 证据文件索引

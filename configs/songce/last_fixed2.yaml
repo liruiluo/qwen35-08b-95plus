@@ -1,6 +1,0 @@
-# SPHERE-Last-Fixed · 交付配方（与 last_adaptive 唯一变量 = arm；
-# 产物目录独立，见 tag）
-defaults:
-  - base
-tag: jb-lastfixed2-s2000
-arm: last_fixed
