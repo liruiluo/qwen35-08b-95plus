@@ -16,10 +16,10 @@
   - GPU 环境装有 torch / transformers / sglang（安装见仓库根 README
     「评测」一节与 requirements.txt）。引擎未启动时本脚本会自动拉起。
 
-判定（测试大纲 4.2.2.5）：
-  训练前模型的错误率预期为 100%，各算法训练后模型的错误率不高于 5%。
-  高效性判据为错误率达到 5% 所需训练步数，SPHERE 各算法少于 GRPO
-  基线，训练曲线见 SNIPS/logs/。
+判定（测试大纲 4.2.2.4(3) 第 4、6 步）：
+  训练前模型的错误率预期为 100%，各算法训练后模型的错误率不高于
+  判据线 4.8%。高效性判据为错误率达到 4.8% 所需训练步数，SPHERE 各算法
+  少于 GRPO 基线，训练曲线见 SNIPS/logs/。
 """
 import argparse
 import os
@@ -38,6 +38,9 @@ LOGS_DIR = os.path.join(ROOT, "SNIPS", "logs")
 MODELS = ["RandomInit", "GRPO-baseline",
           "SPHERE-Last-Adaptive", "SPHERE-All-Adaptive", "SPHERE-Last-Fixed"]
 SPHERE_MODELS = {"SPHERE-Last-Adaptive", "SPHERE-All-Adaptive", "SPHERE-Last-Fixed"}
+
+# 大纲 4.2.2.4(3) 第 6 步的验收判据线，也是第 4 步的高效性判据线（%）
+CRITERION = 4.8
 
 
 def engine_up(url, timeout=2):
@@ -109,7 +112,7 @@ def main():
         rows.append({"model": name, "intent_acc": acc,
                      "error_rate": round(100 - acc, 2) if m else None})
 
-    # 4) 汇总（对齐大纲 4.2.2.5 的合格判据口径）
+    # 4) 汇总（对齐大纲 4.2.2.4(3) 第 4、6 步的判据口径）
     print("\n===== SNIPS test-set error rates (700 utterances) =====")
     print(f"{'model':<24}{'intent acc':>12}{'error rate':>12}  note")
     for r in rows:
@@ -119,7 +122,8 @@ def main():
                     if r["error_rate"] and abs(r["error_rate"] - 100) < 1e-9
                     else "训练前模型错误率 != 100%，请核查")
         elif r["model"] in SPHERE_MODELS and r["error_rate"] is not None:
-            note = "B ≤ 5% 合格" if r["error_rate"] <= 5.0 else "B > 5% 不合格"
+            note = (f"B ≤ {CRITERION}% 合格" if r["error_rate"] <= CRITERION
+                    else f"B > {CRITERION}% 不合格")
         err = "—" if r["error_rate"] is None else f"{r['error_rate']:.2f}%"
         print(f"{r['model']:<24}{r['intent_acc']:>11.2f}%{err:>12}  {note}")
     for name in pending:
