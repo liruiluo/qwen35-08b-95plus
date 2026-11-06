@@ -7,6 +7,7 @@
 
 用法（在仓库根目录）：
   python SNIPS/scripts/evaluate.py                     # 全部 5 个模型
+  python SNIPS/scripts/evaluate.py --log               # 不跑，直接打印已归档的汇总与完整运行 log
   python SNIPS/scripts/evaluate.py --only RandomInit   # 只测训练前模型
   python SNIPS/scripts/evaluate.py --limit 20          # 冒烟（前 20 条）
 
@@ -33,6 +34,12 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 MODELS_DIR = os.path.join(ROOT, "SNIPS", "models")
 DATASET = os.path.join(ROOT, "SNIPS", "dataset", "test.jsonl")
 LOGS_DIR = os.path.join(ROOT, "SNIPS", "logs")
+
+# --log 默认从交付归档读（summary 与完整 log 同源）；可用 --archive 或环境变量覆盖
+ARCHIVE = os.environ.get(
+    "Q95_ARCHIVE",
+    "/home/ai-jingyan-train/luolirui.1/qwen95-delivery/record/eval-run-20261103",
+)
 
 # 大纲 4.2.2.2：测试对象 = 训练前模型 + 基线算法模型 + 三种 SPHERE 算法模型
 MODELS = ["RandomInit", "GRPO-baseline",
@@ -66,13 +73,43 @@ def run(cmd):
     return p.stdout
 
 
+def show_archived(archive):
+    """--log：不跑评测，打印归档那一轮的汇总与完整运行 log。"""
+    pairs = [
+        ("五模型错误率汇总", "evaluate-summary.txt", os.path.join(LOGS_DIR, "evaluate-summary.txt")),
+        ("完整运行 log", "qwen95-rehearsal-eval.log", "/root/qwen95-rehearsal-eval.log"),
+    ]
+    rc = 0
+    for title, name, fallback in pairs:
+        path = os.path.join(archive, name)
+        if not os.path.isfile(path):
+            path = fallback
+        print(f"===== {title} =====")
+        if not os.path.isfile(path):
+            print(f"（找不到 {name}：归档目录 {archive} 与本机都没有）")
+            rc = 1
+            print()
+            continue
+        with open(path, encoding="utf-8") as f:
+            print(f.read().rstrip())
+        print()
+    return rc
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--engine-url", default="http://127.0.0.1:30001")
     ap.add_argument("--port", type=int, default=30001)
+    ap.add_argument("--log", action="store_true",
+                    help="不跑评测，直接打印已归档的汇总与完整运行 log")
+    ap.add_argument("--archive", default=ARCHIVE,
+                    help="--log 读取的归档目录（也可以是 $Q95_ARCHIVE）")
     ap.add_argument("--only", choices=MODELS, help="只评测这一个模型")
     ap.add_argument("--limit", type=int, default=0, help="只跑前 N 条（冒烟用）")
     args = ap.parse_args()
+
+    if args.log:
+        sys.exit(show_archived(args.archive))
 
     todo = [args.only] if args.only else MODELS
 
