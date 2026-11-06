@@ -72,8 +72,8 @@ rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.js
 
    ![test 错误率-训练步数曲线](SNIPS/logs/error-rate-curves.png)
 
-   纵轴 0 起看整体水平，判据线附近的穿越位置见放大图
-   `SNIPS/logs/error-rate-curves-zoom.png`。
+   曲线从第 0 步画起：训练前模型错误率 **100%**（准确率 0%），训练后降到个位数。
+   判据线附近的穿越位置见放大图 `SNIPS/logs/error-rate-curves-zoom.png`。
 
    逐检查点的原始评测数据：
 
