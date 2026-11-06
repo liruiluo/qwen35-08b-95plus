@@ -14,8 +14,15 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 LOGS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "SNIPS", "logs")
-MODELS = ["RandomInit", "GRPO-baseline", "SPHERE-Last-Adaptive",
-          "SPHERE-All-Adaptive", "SPHERE-Last-Fixed"]
+MODELS = ["RandomInit", "SPHERE-Last-Adaptive", "SPHERE-All-Adaptive",
+          "SPHERE-Last-Fixed", "GRPO-baseline"]
+# 与 plot_nm_curves.py / plot_ab_curves.py 保持一致，同一模型在每张图里同一个颜色
+COLORS = {
+    "SPHERE-Last-Adaptive": "#1f77b4",
+    "SPHERE-All-Adaptive": "#ff7f0e",
+    "SPHERE-Last-Fixed": "#2ca02c",
+    "GRPO-baseline": "#d62728",
+}
 
 
 def load(name):
@@ -58,7 +65,7 @@ def main():
         f1.savefig(out)
         plt.close(f1)
         # 对比总图
-        ax.plot(steps, roll, linewidth=1.6, label=name)
+        ax.plot(steps, roll, linewidth=1.6, color=COLORS[name], label=name)
         plotted += 1
         print(f"[plot] {name}: {len(steps)} steps -> {out}")
     if plotted:

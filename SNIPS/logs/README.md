@@ -4,8 +4,11 @@
 数据，生成脚本为 `scripts/plot_songce_curves.py`。`curves-all.png` 为
 全部已训模型的对比总图。`error-rate-curves.png` 为 test 错误率-训练
 步数曲线（从第 0 步的训练前模型 100% 画起），`error-rate-curves-zoom.png` 是判据线
-附近的放大版，两者是高效性判据的可视化。`evaluate.py` 的汇总输出写在本目录
-`evaluate-summary.txt`。
+附近的放大版，两者是高效性判据的可视化。`training-curves-ab.png` 把训练奖励（A）
+和判据错误率（B）拼在一起，由 `scripts/plot_ab_curves.py` 生成。`evaluate.py` 的汇总输出
+写在本目录 `evaluate-summary.txt`。
+
+![训练奖励与判据指标 A/B](training-curves-ab.png)
 
 ![全部模型训练曲线对比](curves-all.png)
 
