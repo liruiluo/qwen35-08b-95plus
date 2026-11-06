@@ -21,6 +21,10 @@ MODELS = ["RandomInit", "GRPO-baseline", "SPHERE-Last-Adaptive",
 def load(name):
     path = os.path.join(LOGS, name, "curves.csv")
     if not os.path.isfile(path):
+        # 缺 csv 时从 training-log.jsonl 现算（两条链路等价）
+        import make_curves_csv
+        make_curves_csv.write_curves_csv(os.path.join(LOGS, name))
+    if not os.path.isfile(path):
         return None
     steps, rew, roll = [], [], []
     with open(path) as f:
