@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""把逐检查点的评测结果写成 eval-log.jsonl（每个模型一份，放在它的 logs 目录里）。
+"""把逐检查点的评测结果写成 training-error-log.jsonl（每个模型一份，放在它的 logs 目录里）。
 
 数据源：results/nm-sweep.csv（scripts/nm_sweep.sh 产出：每 200 步一个检查点，
 逐个加载进引擎、在 test 700 条上评一次意图准确率）。
 
-输出：SNIPS/logs/<模型>/eval-log.jsonl，每行一个检查点：
+输出：SNIPS/logs/<模型>/training-error-log.jsonl，每行一个检查点：
   {"step": 200, "split": "test", "n": 700, "intent_acc": 95.29, "error_rate": 4.71}
 
 这样"训练曲线"和"训练日志"就落在同一个目录里：training-log.jsonl 记训练内信号，
-eval-log.jsonl 记判据指标。
+training-error-log.jsonl 记判据指标。
 
 用法（仓库根目录）：
   python scripts/make_eval_log.py                       # 用默认 results/nm-sweep.csv
@@ -48,7 +48,7 @@ def main(argv):
             print(f"[skip] {model}：没有 logs 目录")
             continue
         rows.sort()
-        out_path = os.path.join(out_dir, "eval-log.jsonl")
+        out_path = os.path.join(out_dir, "training-error-log.jsonl")
         with open(out_path, "w", encoding="utf-8") as f:
             for step, acc in rows:
                 rec = {
