@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPHERE-All-Adaptive 训练（config = configs/songce/all_adaptive.yaml；
+# SPHERE 训练（config = configs/songce/all_adaptive.yaml；
 # 引擎检查 → 训练 → 权重加载 → dev/test 评测；训练服务器布局）
 set -u
 cd /root/train95

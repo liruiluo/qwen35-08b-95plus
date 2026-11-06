@@ -43,8 +43,8 @@ ARCHIVE = os.environ.get(
 
 # 大纲 4.2.2.2：测试对象 = 训练前模型 + 基线算法模型 + 三种 SPHERE 算法模型
 MODELS = ["RandomInit", "GRPO-baseline",
-          "SPHERE-Last-Adaptive", "SPHERE-All-Adaptive", "SPHERE-Last-Fixed"]
-SPHERE_MODELS = {"SPHERE-Last-Adaptive", "SPHERE-All-Adaptive", "SPHERE-Last-Fixed"}
+          "ATLAS", "SPHERE", "FIXA"]
+SPHERE_MODELS = {"ATLAS", "SPHERE", "FIXA"}
 
 # 大纲 4.2.2.4(3) 第 6 步的验收判据线，也是第 4 步的高效性判据线（%）
 CRITERION = 4.8

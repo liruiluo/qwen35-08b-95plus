@@ -4,18 +4,29 @@
 |---|---|---|---|
 | `RandomInit/` | 训练前模型 | ✅ 权重随材料交付 | **100%**（700/700 不可解析，意图准确率 0.00%） |
 | `GRPO-baseline/` | 基线算法模型（GRPO） | ✅ 权重随材料交付 | **4.71%**（意图准确率 95.29%） |
-| `SPHERE-Last-Adaptive/` | 项目算法 1 | ✅ 权重随材料交付 | **2.86%**（意图准确率 97.14%） |
-| `SPHERE-All-Adaptive/` | 项目算法 2 | ✅ 权重随材料交付 | **4.00%**（意图准确率 96.00%） |
-| `SPHERE-Last-Fixed/` | 项目算法 3 | ✅ 权重随材料交付 | **3.57%**（意图准确率 96.43%） |
+| `ATLAS/` | 项目算法 1 | ✅ 权重随材料交付 | **2.86%**（意图准确率 97.14%） |
+| `SPHERE/` | 项目算法 2 | ✅ 权重随材料交付 | **4.00%**（意图准确率 96.00%） |
+| `FIXA/` | 项目算法 3 | ✅ 权重随材料交付 | **3.57%**（意图准确率 96.43%） |
 
 ## 命名映射（大纲名称 ↔ 代码名）
 
 | 大纲名称 | 训练器 `--arm` |
 |---|---|
-| SPHERE-Last-Adaptive | `last_adaptive` |
-| SPHERE-All-Adaptive | `all_hidden_adaptive` |
-| SPHERE-Last-Fixed | `last_fixed` |
+| ATLAS | `last_adaptive` |
+| SPHERE | `all_hidden_adaptive` |
+| FIXA | `last_fixed` |
 | GRPO 基线 | （`--arm` 任意 + `--rho 0`） |
+
+## 三种算法各是什么
+
+三者的差别只在**谱正则的作用范围**和**系数调度**，其余训练配方完全相同
+（GRPO、2000 步、每步 4 prompt × 16 rollout、lr 3e-6、seed 17、意图定义提示）：
+
+| 算法 | 谱正则作用范围 | 系数 α | 训练配置 |
+|---|---|---|---|
+| **ATLAS** | 最后一层（layer 23） | 自适应，α = Tr(A)/D（detached） | `last_adaptive` |
+| **SPHERE** | 全部 24 层 | 自适应，同上 | `all_hidden_adaptive` |
+| **FIXA** | 最后一层 | 固定 α = 1 | `last_fixed` |
 
 ## 权重获取
 
@@ -31,9 +42,9 @@ README「评测」一节。
 |---|---|
 | RandomInit | `models/Qwen3.5-0.8B-RandomInit` |
 | GRPO-baseline | `ckpt/jb-grpobase6-s2000` |
-| SPHERE-Last-Adaptive | `ckpt/jb-interpdef4s2000-last_adaptive` |
-| SPHERE-All-Adaptive | `ckpt/jb-interpdef4s2000-all_hidden_adaptive` |
-| SPHERE-Last-Fixed | `ckpt/jb-interpdef4s2000-last_fixed` |
+| ATLAS | `ckpt/jb-interpdef4s2000-last_adaptive` |
+| SPHERE | `ckpt/jb-interpdef4s2000-all_hidden_adaptive` |
+| FIXA | `ckpt/jb-interpdef4s2000-last_fixed` |
 
 RandomInit 由 `scripts/make_random_init.py` 以 seed 17 从
 Qwen3.5-0.8B 随机重置生成，可离线复现。

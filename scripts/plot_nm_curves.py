@@ -21,8 +21,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 LOGS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "SNIPS", "logs")
-MODELS = ["SPHERE-Last-Adaptive", "SPHERE-All-Adaptive",
-          "SPHERE-Last-Fixed", "GRPO-baseline"]
+MODELS = ["ATLAS", "SPHERE",
+          "FIXA", "GRPO-baseline"]
 THRESHOLDS = [(4.8, "4.8% criterion")]
 INIT_ERROR_FALLBACK = 100.0
 

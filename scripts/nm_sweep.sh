@@ -16,9 +16,9 @@ OUT=results/nm-sweep.csv
 curl -s -m 5 $URL/health >/dev/null 2>&1 || { echo "FATAL engine down"; exit 1; }
 
 echo "model,step,intent_acc" > "$OUT"
-for m in "SPHERE-Last-Adaptive:jb-interpdef4s2000-last_adaptive" \
-         "SPHERE-All-Adaptive:jb-interpdef4s2000-all_hidden_adaptive" \
-         "SPHERE-Last-Fixed:jb-interpdef4s2000-last_fixed" \
+for m in "ATLAS:jb-interpdef4s2000-last_adaptive" \
+         "SPHERE:jb-interpdef4s2000-all_hidden_adaptive" \
+         "FIXA:jb-interpdef4s2000-last_fixed" \
          "GRPO-baseline:jb-grpobase6-s2000"; do
   name=${m%%:*}
   tag=${m##*:}

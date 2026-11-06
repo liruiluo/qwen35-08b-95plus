@@ -13,9 +13,9 @@ SNIPS 指令认知识别任务，评价指标为 7 类意图分类准确率。
 | 模型 | test 准确率 | 错误率 | 大纲判据（≤4.8%） |
 |---|---|---|---|
 | 训练前模型 | 0.00% | 100% | — |
-| **SPHERE-Last-Adaptive** | **97.14%** | **2.86%** | **通过** |
-| SPHERE-All-Adaptive | 96.00% | 4.00% | 通过 |
-| SPHERE-Last-Fixed | 96.43% | 3.57% | 通过 |
+| **ATLAS** | **97.14%** | **2.86%** | **通过** |
+| SPHERE | 96.00% | 4.00% | 通过 |
+| FIXA | 96.43% | 3.57% | 通过 |
 | GRPO 基线 | 95.29% | 4.71% | — |
 
 训练过程与判据指标画在一张图上：**A** 是训练奖励（每步 4 prompt × 16 rollout 的均值，
@@ -40,9 +40,9 @@ SNIPS 指令认知识别任务，评价指标为 7 类意图分类准确率。
 D=/home/ai-jingyan-train/luolirui.1/qwen95-delivery   # jd 上改为 /mnt/amg-nfs/luolirui.1/qwen95-delivery
 rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/models/Qwen3.5-0.8B-RandomInit/ SNIPS/models/RandomInit/
 rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/ckpt/jb-grpobase6-s2000/ SNIPS/models/GRPO-baseline/
-rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/ckpt/jb-interpdef4s2000-last_adaptive/ SNIPS/models/SPHERE-Last-Adaptive/
-rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/ckpt/jb-interpdef4s2000-all_hidden_adaptive/ SNIPS/models/SPHERE-All-Adaptive/
-rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/ckpt/jb-interpdef4s2000-last_fixed/ SNIPS/models/SPHERE-Last-Fixed/
+rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/ckpt/jb-interpdef4s2000-last_adaptive/ SNIPS/models/ATLAS/
+rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/ckpt/jb-interpdef4s2000-all_hidden_adaptive/ SNIPS/models/SPHERE/
+rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.json' $D/ckpt/jb-interpdef4s2000-last_fixed/ SNIPS/models/FIXA/
 ```
 
 1. 测试数据样例，`SNIPS/dataset/` 下 test 共 700 条，行格式见其
@@ -65,7 +65,7 @@ rsync -a --exclude 'step*' --exclude 'training-log.jsonl' --exclude 'evidence.js
    `scripts/nm_sweep.sh` 生成 `SNIPS/logs/nm-sweep.csv` 与曲线图
    `error-rate-curves.png`。错误率首次不超过各阈值的训练步数：
 
-   | 错误率阈值 | SPHERE-Last-Adaptive | SPHERE-All-Adaptive | SPHERE-Last-Fixed | GRPO 基线 |
+   | 错误率阈值 | ATLAS | SPHERE | FIXA | GRPO 基线 |
    |---|---|---|---|---|
    | 4.8% 判据线 | 200 | 200 | 600 | 1400 |
    | 4.5% | 600 | 600 | 600 | 未达到 |
@@ -114,9 +114,9 @@ python scripts/make_random_init.py base/Qwen3.5-0.8B <随机初始化目录>
 bash engine/launch_engine.sh <base模型> 30001
 
 # 4) 训练：每个算法一个 hydra 配置，见 configs/songce/
-python methods/train_hydra.py -cn last_adaptive   # SPHERE-Last-Adaptive
-python methods/train_hydra.py -cn all_adaptive    # SPHERE-All-Adaptive
-python methods/train_hydra.py -cn last_fixed      # SPHERE-Last-Fixed
+python methods/train_hydra.py -cn last_adaptive   # ATLAS
+python methods/train_hydra.py -cn all_adaptive    # SPHERE
+python methods/train_hydra.py -cn last_fixed      # FIXA
 python methods/train_hydra.py -cn grpo_baseline   # GRPO 基线
 ```
 
@@ -132,9 +132,9 @@ Parseval 型正则。
 
 四个训练配置：
 
-- SPHERE-Last-Adaptive：仅最后一层，自适应 α
-- SPHERE-All-Adaptive：全部层
-- SPHERE-Last-Fixed：仅最后一层，固定 α=1
+- ATLAS：仅最后一层，自适应 α
+- SPHERE：全部层
+- FIXA：仅最后一层，固定 α=1
 - GRPO 基线：关闭谱正则项
 
 评测采用 JointBERT 标准划分，划分依据见 `SNIPS/dataset/README.md`。

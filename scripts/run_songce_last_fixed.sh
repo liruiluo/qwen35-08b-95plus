@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPHERE-Last-Fixed 训练（config = configs/songce/last_fixed.yaml；
+# FIXA 训练（config = configs/songce/last_fixed.yaml；
 # 引擎检查 → 训练 → 权重加载 → dev/test 评测；训练服务器布局）
 set -u
 cd /root/train95

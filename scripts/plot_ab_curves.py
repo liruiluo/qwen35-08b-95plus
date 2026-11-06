@@ -22,12 +22,12 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 LOGS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "SNIPS", "logs")
-MODELS = ["SPHERE-Last-Adaptive", "SPHERE-All-Adaptive",
-          "SPHERE-Last-Fixed", "GRPO-baseline"]
+MODELS = ["ATLAS", "SPHERE",
+          "FIXA", "GRPO-baseline"]
 COLORS = {
-    "SPHERE-Last-Adaptive": "#1f77b4",
-    "SPHERE-All-Adaptive": "#ff7f0e",
-    "SPHERE-Last-Fixed": "#2ca02c",
+    "ATLAS": "#1f77b4",
+    "SPHERE": "#ff7f0e",
+    "FIXA": "#2ca02c",
     "GRPO-baseline": "#d62728",
 }
 INIT_ERROR_FALLBACK = 100.0

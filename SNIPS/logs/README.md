@@ -14,20 +14,20 @@
 
 | 子目录 | 内容 | 说明 |
 |---|---|---|
-| `SPHERE-Last-Adaptive/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 项目算法 1 |
-| `SPHERE-All-Adaptive/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 项目算法 2 |
-| `SPHERE-Last-Fixed/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 项目算法 3 |
+| `ATLAS/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 项目算法 1 |
+| `SPHERE/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 项目算法 2 |
+| `FIXA/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 项目算法 3 |
 | `GRPO-baseline/` | `curves.png` + `curves.csv` + `training-log.jsonl` | 基线模型 |
 
 RandomInit 为训练前模型，无训练曲线，不建子目录，零样本错误率 100%。
 
 各模型训练曲线：
 
-![SPHERE-Last-Adaptive 训练曲线](SPHERE-Last-Adaptive/curves.png)
+![ATLAS 训练曲线](ATLAS/curves.png)
 
-![SPHERE-All-Adaptive 训练曲线](SPHERE-All-Adaptive/curves.png)
+![SPHERE 训练曲线](SPHERE/curves.png)
 
-![SPHERE-Last-Fixed 训练曲线](SPHERE-Last-Fixed/curves.png)
+![FIXA 训练曲线](FIXA/curves.png)
 
 ![GRPO-baseline 训练曲线](GRPO-baseline/curves.png)
 
@@ -39,7 +39,7 @@ RandomInit 为训练前模型，无训练曲线，不建子目录，零样本错
 `error-rate-curves.png`，得到错误率-步数曲线。
 错误率首次不超过各阈值的训练步数：
 
-| 错误率阈值 | SPHERE-Last-Adaptive | SPHERE-All-Adaptive | SPHERE-Last-Fixed | GRPO 基线 |
+| 错误率阈值 | ATLAS | SPHERE | FIXA | GRPO 基线 |
 |---|---|---|---|---|
 | 4.8% 判据线 | 200 | 200 | 600 | 1400 |
 | 4.5% | 600 | 600 | 600 | 未达到 |

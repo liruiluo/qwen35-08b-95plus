@@ -14,13 +14,13 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 LOGS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "SNIPS", "logs")
-MODELS = ["RandomInit", "SPHERE-Last-Adaptive", "SPHERE-All-Adaptive",
-          "SPHERE-Last-Fixed", "GRPO-baseline"]
+MODELS = ["RandomInit", "ATLAS", "SPHERE",
+          "FIXA", "GRPO-baseline"]
 # 与 plot_nm_curves.py / plot_ab_curves.py 保持一致，同一模型在每张图里同一个颜色
 COLORS = {
-    "SPHERE-Last-Adaptive": "#1f77b4",
-    "SPHERE-All-Adaptive": "#ff7f0e",
-    "SPHERE-Last-Fixed": "#2ca02c",
+    "ATLAS": "#1f77b4",
+    "SPHERE": "#ff7f0e",
+    "FIXA": "#2ca02c",
     "GRPO-baseline": "#d62728",
 }
 
