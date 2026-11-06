@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""生成 SNIPS/logs/error-rate-curves.png：test 错误率-训练步数曲线。
+"""生成 test 错误率-训练步数曲线（两张）：
+  SNIPS/logs/error-rate-curves.png        纵轴 0 起，看整体水平
+  SNIPS/logs/error-rate-curves-zoom.png   放大到 2.5–5.5%，看 4.8% 判据线的穿越位置
 
 数据 = SNIPS/logs/nm-sweep.csv（scripts/nm_sweep.sh 逐检查点扫描）：
 每 200 步保存的检查点加载权重后跑一次 test 集（700 条）得到的
@@ -36,8 +38,7 @@ def load():
     return data
 
 
-def main():
-    data = load()
+def draw(data, ylim, filename, y_ticks):
     fig, ax = plt.subplots(figsize=(8, 5))
     for m in MODELS:
         steps, errs = data[m]
@@ -49,13 +50,25 @@ def main():
     ax.set_xlabel("training steps (checkpoint every 200)")
     ax.set_ylabel("test error rate (%)")
     ax.set_xlim(0, 2300)
-    ax.set_ylim(2, 6)
+    ax.set_ylim(*ylim)
+    ax.set_yticks(y_ticks)
     ax.grid(True, alpha=0.25)
     ax.legend(loc="upper right", fontsize=9)
     fig.tight_layout()
-    out = os.path.join(LOGS, "error-rate-curves.png")
+    out = os.path.join(LOGS, filename)
     fig.savefig(out, dpi=150)
+    plt.close(fig)
     print("[plot] error-rate vs step ->", out)
+
+
+def main():
+    data = load()
+    # 整体：纵轴从 0 起
+    draw(data, (0, 6.2), "error-rate-curves.png",
+         [0, 1, 2, 3, 4, 4.8, 5, 6])
+    # 放大：只看 2.5–5.5%，4.8% 判据线和穿越位置更清楚
+    draw(data, (2.5, 5.5), "error-rate-curves-zoom.png",
+         [2.5, 3.0, 3.5, 4.0, 4.5, 4.8, 5.0, 5.5])
 
 
 if __name__ == "__main__":
