@@ -3,7 +3,7 @@
 
 数据 = SNIPS/logs/nm-sweep.csv（scripts/nm_sweep.sh 逐检查点扫描）：
 每 200 步保存的检查点加载权重后跑一次 test 集（700 条）得到的
-意图准确率，换算成错误率画曲线，并画出 4.8% 判据线与 4.5% 参照线。
+意图准确率，换算成错误率画曲线，并画出 4.8% 判据线。
 
 用法（仓库根目录）：
   python scripts/plot_nm_curves.py
@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 LOGS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "SNIPS", "logs")
 MODELS = ["SPHERE-Last-Adaptive", "SPHERE-All-Adaptive",
           "SPHERE-Last-Fixed", "GRPO-baseline"]
-THRESHOLDS = [(4.8, "4.8% (criterion)"), (4.5, "4.5%")]
+THRESHOLDS = [(4.8, "4.8% criterion")]
 
 
 def load():
