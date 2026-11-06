@@ -1,0 +1,10 @@
+{"step": 200, "split": "test", "n": 700, "intent_acc": 95.43, "error_rate": 4.57}
+{"step": 400, "split": "test", "n": 700, "intent_acc": 95.43, "error_rate": 4.57}
+{"step": 600, "split": "test", "n": 700, "intent_acc": 95.86, "error_rate": 4.14}
+{"step": 800, "split": "test", "n": 700, "intent_acc": 96.0, "error_rate": 4.0}
+{"step": 1000, "split": "test", "n": 700, "intent_acc": 96.14, "error_rate": 3.86}
+{"step": 1200, "split": "test", "n": 700, "intent_acc": 96.86, "error_rate": 3.14}
+{"step": 1400, "split": "test", "n": 700, "intent_acc": 96.14, "error_rate": 3.86}
+{"step": 1600, "split": "test", "n": 700, "intent_acc": 95.86, "error_rate": 4.14}
+{"step": 1800, "split": "test", "n": 700, "intent_acc": 96.57, "error_rate": 3.43}
+{"step": 2000, "split": "test", "n": 700, "intent_acc": 96.0, "error_rate": 4.0}

@@ -3,6 +3,10 @@
 # criterion evidence). For each model and each 200-step checkpoint: load the
 # weights into the running engine, evaluate on the test set, append (model,
 # step, INTENT_ACC) to results/nm-sweep.csv.
+#
+# After the sweep, turn it into the per-model accuracy logs that ship with the
+# delivery (SNIPS/logs/<model>/eval-log.jsonl):
+#   python scripts/make_eval_log.py results/nm-sweep.csv
 set -u
 cd /root/train95
 PY=/root/h3venv/bin/python
