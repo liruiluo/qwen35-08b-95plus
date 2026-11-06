@@ -1,0 +1,46 @@
+{
+  "说明": "SNIPS/dataset/test.jsonl 的前 2 条（原始文件一行一条 JSONL），按角色展开便于阅读",
+  "system": "You are a Natural Language Understanding engine for a voice assistant. Given a user utterance, predict (1) the intent and (2) all slot spans in the utterance. Possible intents (choose exactly one): AddToPlaylist, BookRes …（共 2475 字符，完整内容即文件里的第一条 system 消息）",
+  "samples": [
+    {
+      "user": "add sabrina salerno to the grime instrumentals playlist",
+      "answer": {
+        "intent": "AddToPlaylist",
+        "slots": [
+          {
+            "name": "artist",
+            "value": "sabrina salerno"
+          },
+          {
+            "name": "playlist",
+            "value": "grime instrumentals"
+          }
+        ]
+      }
+    },
+    {
+      "user": "i want to bring four people to a place that s close to downtown that serves churrascaria cuisine",
+      "answer": {
+        "intent": "BookRestaurant",
+        "slots": [
+          {
+            "name": "party_size_number",
+            "value": "four"
+          },
+          {
+            "name": "spatial_relation",
+            "value": "close"
+          },
+          {
+            "name": "poi",
+            "value": "downtown"
+          },
+          {
+            "name": "restaurant_type",
+            "value": "churrascaria"
+          }
+        ]
+      }
+    }
+  ]
+}
