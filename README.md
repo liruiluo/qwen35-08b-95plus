@@ -126,15 +126,14 @@ python methods/train_hydra.py -cn grpo_baseline   # GRPO 基线
 ## 方法
 
 训练算法为 **GRPO**（组相对策略优化）：对每个提示采样 16 条输出，以
-组内相对优势替代价值网络估计。在此之上叠加 **SPHERE 谱塑性正则**
-（ICML 2026）：对 Transformer MLP 层输入的 Gram 矩阵施加
-Parseval 型正则。
+组内相对优势替代价值网络估计。在此之上叠加 ICML 2026 论文 **SPHERE** 提出的**谱塑性正则**：
+对 Transformer MLP 层输入的 Gram 矩阵施加 Parseval 型正则。
 
-四个训练配置：
+四个训练配置（三种算法 + 基线）：
 
-- ATLAS：仅最后一层，自适应 α
-- SPHERE：全部层
-- FIXA：仅最后一层，固定 α=1
+- **ATLAS**：谱正则作用在最后一层，系数 α 自适应（α = Tr(A)/D，detached）
+- **SPHERE**：谱正则作用在全部 24 层，系数自适应
+- **FIXA**：谱正则作用在最后一层，系数固定 α = 1
 - GRPO 基线：关闭谱正则项
 
 评测采用 JointBERT 标准划分，划分依据见 `SNIPS/dataset/README.md`。
